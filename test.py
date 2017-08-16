@@ -1,0 +1,3 @@
+import piko
+
+piko.main()
