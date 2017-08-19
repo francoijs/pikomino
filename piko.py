@@ -7,12 +7,12 @@ DBNAME = 'q.db'
 
 def main():
     q = loadq(DBNAME)
-    state = ([0,0,0,0,0,0], roll(8), 21)
-    state,reward = episode(state)
+    state,reward = episode(([0,0,0,0,0,0], roll(8), 21))
     print 'end:',state,reward
     saveq(DBNAME, q)
 
 def episode(state):
+    """ Run an episode and return final state and reward """
     while True:
         state0 = copy.deepcopy(state)
         action = policy(state)
@@ -32,6 +32,11 @@ def episode(state):
     return state,reward
 
 def policy(state):
+    """
+    Return preferred action for the given state:
+    a in [0-5] : keep dice value a and reroll
+    a in [6-11]: keep dice value a-6 and stop
+    """
     # dices that may be kept before rerolling
     candidates = [n for n in range(6) if state[1][n]>0 and state[0][n]==0]
     if score(state) >= state[2]:
@@ -43,11 +48,13 @@ def policy(state):
     return random.choice(candidates)
 
 def score(state):
+    """ Return score for the given state """
     if state[0][0] == 0:
         return 0
     return 5*state[0][0] + sum([n*state[0][n] for n in range(6)])
     
 def roll(n):
+    """ Roll n dices and return 6-array with count for each value """
     roll = [0,0,0,0,0,0]
     draw = [random.randint(0,5) for _ in range(n)]
     for d in draw:
