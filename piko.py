@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-import random, copy
+import random, copy, math
 
 def main():
-    state = ([0,0,0,0,0,0], roll(8))
+    state = ([0,0,0,0,0,0], roll(8), 21)
     state,reward = episode(state)
     print 'end:',state,reward
 
@@ -12,22 +12,28 @@ def episode(state):
         state0 = copy.deepcopy(state)
         action = policy(state)
         if action == -1:
-            # no action available
+            # roll is lost
             reward = -100
             break
-        if action == 6:
-            # action = 'stop'
+        if action > 5:
+            # keep some dices then stop
+            state[0][action-6] += state[1][action-6]
             reward = score(state)
             break
-        state = play(state, action)
+        # keep some dices then reroll
+        state[0][action] += state[1][action]
+        state = (state[0], roll(8-sum(state[0])), state[2])
         print state0, '->', state
     return state,reward
 
 def policy(state):
+    # dices that may be kept before rerolling
     candidates = [n for n in range(6) if state[1][n]>0 and state[0][n]==0]
-    if score(state)>20:
-        candidates += [6]
+    if score(state) >= state[2]:
+        # dices that may be kept before stopping
+        candidates += [6+n for n in range(6) if state[1][n]>0 and state[0][n]==0]
     if len(candidates) == 0:
+        # no dice may be kept -> this roll is lost
         return -1
     return random.choice(candidates)
 
@@ -42,12 +48,6 @@ def roll(n):
     for d in draw:
         roll[d] += 1
     return roll
-
-def play(state, action):
-    if action is 6:
-        return state, score(state)
-    state[0][action] += state[1][action]
-    return (state[0], roll(8-sum(state[0])))
 
 if __name__ == "__main__":
     main()
