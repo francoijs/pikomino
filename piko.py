@@ -1,11 +1,16 @@
 #!/usr/bin/python
 
-import random, copy, math
+import random, copy, math, collections, os
+import cPickle as pickle
+
+DBNAME = 'q.db'
 
 def main():
+    q = loadq(DBNAME)
     state = ([0,0,0,0,0,0], roll(8), 21)
     state,reward = episode(state)
     print 'end:',state,reward
+    saveq(DBNAME, q)
 
 def episode(state):
     while True:
@@ -49,5 +54,21 @@ def roll(n):
         roll[d] += 1
     return roll
 
+def loadq(fname):
+    if not os.path.isfile(fname):
+        print 'creating empty db'
+        q = {}
+        q.setdefault(0)
+        return q
+    print 'loading q-values from', fname
+    with open(fname, 'rb') as file:
+        return pickle.load(file)
+    
+def saveq(fname, q):
+    with open(fname, 'wb') as file:
+        pickle.dump(q, file, pickle.HIGHEST_PROTOCOL)
+    print 'q-values saved to', fname
+
+    
 if __name__ == "__main__":
     main()
