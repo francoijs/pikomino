@@ -7,11 +7,11 @@ DBNAME = 'q.db'
 
 def main():
     q = loadq(DBNAME)
-    state,reward = episode(([0,0,0,0,0,0], roll(8), 21))
+    state,reward = episode(([0,0,0,0,0,0], roll(8), 21), q)
     print 'end:',state,reward
     saveq(DBNAME, q)
 
-def episode(state):
+def episode(state, q):
     """ Run an episode and return final state and reward """
     while True:
         state0 = copy.deepcopy(state)
@@ -24,10 +24,17 @@ def episode(state):
             # keep some dices then stop
             state[0][action-6] += state[1][action-6]
             reward = score(state)
+            if reward == state[2]:
+                state[2] = min(state[2]+1, 36)
             break
         # keep some dices then reroll
         state[0][action] += state[1][action]
+        reward = 0
         state = (state[0], roll(8-sum(state[0])), state[2])
+        # update q(state0,action)
+        old = getq(q, state0, action)
+        new = old + 0.1 * ( reward + max([getq(q,state,a) for a in range(12)]) - old )
+        setq(q, state0, action, new)
         print state0, '->', state
     return state,reward
 
@@ -61,20 +68,27 @@ def roll(n):
         roll[d] += 1
     return roll
 
+def _hash(state, action):
+    return hash( (tuple(state[0]), tuple(state[1]), state[2], action) )
+def getq(q, state, action):
+    return q.get(_hash(state,action), 0)
+def setq(q, state, action, val):
+    q[_hash(state,action)] = val
+    
 def loadq(fname):
     if not os.path.isfile(fname):
         print 'creating empty db'
         q = {}
-        q.setdefault(0)
-        return q
-    print 'loading q-values from', fname
-    with open(fname, 'rb') as file:
-        return pickle.load(file)
+    else:
+        with open(fname, 'rb') as file:
+            q = pickle.load(file)
+        print 'loaded %d q-values from' % (len(q)), fname
+    return q
     
 def saveq(fname, q):
     with open(fname, 'wb') as file:
         pickle.dump(q, file, pickle.HIGHEST_PROTOCOL)
-    print 'q-values saved to', fname
+    print '%d q-values saved to' % (len(q)), fname
 
     
 if __name__ == "__main__":
