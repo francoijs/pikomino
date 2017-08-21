@@ -5,25 +5,34 @@ import cPickle as pickle
 
 DBNAME = 'q.db'
 STEP = 10000
+EPSILON = 0.01
 
 def main():
+    q = loadq(DBNAME)
+    state,reward = episode(([0,0,0,0,0,0], roll(8), 21), q)
+    print 'end:',state,reward
+    
+def train():
     q = loadq(DBNAME)
     # counters
     won = 0
     all = 0
     rate = 0
+    gain = 0
     time0 = time.time()
     while True:
         state,reward = episode(([0,0,0,0,0,0], roll(8), 21), q)
 #        print 'end:',state,reward
         if reward > 0:
             won += 1
+            gain += reward
         all += 1
         if not all % STEP:
             perf = (time.time() - time0) * float(1000) / STEP
             rate = 100 * float(won)/STEP
-            print 'games: %d / won: %.1f%% of last %d / time: %.3fms/game' % (all, rate, STEP, perf)
+            print 'games: %d / won: %.1f%% of last %d / avg gain: %.1f / time: %.3fms/game' % (all, rate, STEP, float(gain)/won, perf)
             won = 0
+            gain = 0
             time0 = time.time()
         if all == 100000:
             break    
@@ -72,7 +81,8 @@ def policy(state, q):
     if len(candidates) == 0:
         # no dice may be kept -> this roll is lost
         return -1
-    if random.random() < 0.1:   # epsilon
+    if random.random() < EPSILON:
+        # exploration
         return random.choice(candidates)
     # return best action
     return candidates[ max(range(len(candidates)), key=lambda i: getq(q,state,candidates[i])) ]
