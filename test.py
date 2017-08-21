@@ -1,3 +1,6 @@
-import piko
+import piko, unittest
 
-piko.main()
+class Test(unittest.TestCase):
+
+    def test(self):
+        piko.main()
