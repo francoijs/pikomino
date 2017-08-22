@@ -3,6 +3,13 @@ import cPickle as pickle
 
 ALPHA = 0.3    # learning rate
 EPSILON = 0.1
+LOG = False
+
+def setparams(alpha, epsilon, log=False):
+    global ALPHA, EPSILON, LOG
+    ALPHA = alpha
+    EPSILON = epsilon
+    LOG = log
 
 def episode(state, q):
     """ Run an episode and return final state and reward """
@@ -27,7 +34,8 @@ def episode(state, q):
         old = getq(q, state0, action)
         new = old + ALPHA * ( reward + qsa - old )
         setq(q, state0, action, new)
-#        print state0, '--|%d|->' % (action), state
+        if LOG:
+            print state0, '--|%d|->' % (action), state
         if reward != 0:
             break
     return state,reward

@@ -1,20 +1,21 @@
 #!/usr/bin/python
 
 import time
-from piko import episode, roll, loadq, saveq
+from piko import episode, roll, loadq, saveq, setparams
 
 DBNAME = 'q.db'
 EPISODES = 100000
 STEP = 10000
 
 def main():
+    # learning mode
+    setparams(0.3, 0.1)
     q = loadq(DBNAME)
     # counters
     won = all = rate = gain = 0
     time0 = time.time()
     while True:
         state,reward = episode(([0,0,0,0,0,0], roll(8)), q)
-#        print 'end:',state,reward
         if reward > 0:
             won += 1
             gain += reward
