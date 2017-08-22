@@ -4,24 +4,23 @@ import random, copy, math, collections, os, time
 import cPickle as pickle
 
 DBNAME = 'q.db'
+EPISODES = 100000
 STEP = 10000
-EPSILON = 0.01
+ALPHA = 0.3    # learning rate
+EPSILON = 0.1
 
 def main():
     q = loadq(DBNAME)
-    state,reward = episode(([0,0,0,0,0,0], roll(8), 21), q)
+    state,reward = episode(([0,0,0,0,0,0], roll(8)), q)
     print 'end:',state,reward
     
 def train():
     q = loadq(DBNAME)
     # counters
-    won = 0
-    all = 0
-    rate = 0
-    gain = 0
+    won = all = rate = gain = 0
     time0 = time.time()
     while True:
-        state,reward = episode(([0,0,0,0,0,0], roll(8), 21), q)
+        state,reward = episode(([0,0,0,0,0,0], roll(8)), q)
 #        print 'end:',state,reward
         if reward > 0:
             won += 1
@@ -34,7 +33,7 @@ def train():
             won = 0
             gain = 0
             time0 = time.time()
-        if all == 100000:
+        if all == EPISODES:
             break    
     saveq(DBNAME, q)
 
@@ -45,22 +44,21 @@ def episode(state, q):
         action = policy(state, q)
         if action == -1:
             # roll is lost
-            reward = -100
+            qsa = reward = -100
         elif action > 5:
             # keep some dices then stop
             state[0][action-6] += state[1][action-6]
-            reward = score(state)
-            if reward == state[2]:
-                state[2] = min(state[2]+1, 36)
-            state = (state[0], [0,0,0,0,0,0], state[2])
+            qsa = reward = score(state)
+            state = (state[0], [0,0,0,0,0,0])
         else:
             # keep some dices then reroll
             state[0][action] += state[1][action]
             reward = 0
-            state = (state[0], roll(8-sum(state[0])), state[2])
+            state = (state[0], roll(8-sum(state[0])))
+            qsa = max([getq(q,state,a) for a in range(12)])
         # update q(state0,action)
         old = getq(q, state0, action)
-        new = old + 0.1 * ( reward + max([getq(q,state,a) for a in range(12)]) - old )
+        new = old + ALPHA * ( reward + qsa - old )
         setq(q, state0, action, new)
 #        print state0, '--|%d|->' % (action), state
         if reward != 0:
@@ -70,16 +68,16 @@ def episode(state, q):
 def policy(state, q):
     """
     Return preferred action for the given state:
-    a in [0-5] : keep dice value a and reroll
-    a in [6-11]: keep dice value a-6 and stop
+    - a in [0-5] : keep dice value a and reroll
+    - a in [6-11]: keep dice value a-6 and stop
     """
     # dices that may be kept before rerolling
     candidates = [n for n in range(6) if state[1][n]>0 and state[0][n]==0]
-    if score(state) >= state[2]:
+    if score(state) >= 21:
         # dices that may be kept before stopping
         candidates += [6+n for n in range(6) if state[1][n]>0 and state[0][n]==0]
     if len(candidates) == 0:
-        # no dice may be kept -> this roll is lost
+        # no dice available -> this roll is lost
         return -1
     if random.random() < EPSILON:
         # exploration
@@ -102,7 +100,7 @@ def roll(n):
     return roll
 
 def _hash(state, action):
-    return hash( (tuple(state[0]), tuple(state[1]), state[2], action) )
+    return hash( (tuple(state[0]), tuple(state[1]), action) )
 def getq(q, state, action):
     return q.get(_hash(state,action), 0)
 def setq(q, state, action, val):
