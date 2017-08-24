@@ -4,12 +4,14 @@ import cPickle as pickle
 ALPHA = 0.3    # learning rate
 EPSILON = 0.1
 LOG = False
+TARGET = 0     # target tile (0 for the largest possible)
 
-def setparams(alpha, epsilon, log=False):
+def setparams(alpha, epsilon, log=False, target=0):
     global ALPHA, EPSILON, LOG
     ALPHA = alpha
     EPSILON = epsilon
     LOG = log
+    TARGET = target
 
 def episode(state, q):
     """ Run an episode and return final state and reward """
@@ -22,7 +24,13 @@ def episode(state, q):
         elif action > 5:
             # keep some dices then stop
             state[0][action-6] += state[1][action-6]
-            qsa = reward = score(state)
+            tile = score(state)
+            if TARGET == 0:
+                qsa = reward = score(state)
+            elif tile == TARGET:
+                qsa = reward = 100
+            else:
+                qsa = reward = tile
             state = (state[0], [0,0,0,0,0,0])
         else:
             # keep some dices then reroll
@@ -63,8 +71,11 @@ def policy(state, q):
 def score(state):
     """ Return score for the given state """
     if state[0][0] == 0:
-        return 0
-    return 5*state[0][0] + sum([n*state[0][n] for n in range(6)])
+        return -100
+    tile = 5*state[0][0] + sum([n*state[0][n] for n in range(6)])
+    if tile > 20:
+        return tile
+    return -100
     
 def roll(n):
     """ Roll n dices and return 6-array with count for each value """
