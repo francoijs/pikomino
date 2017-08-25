@@ -1,11 +1,12 @@
 #!/usr/bin/python
 
-import time, sys
+import time, sys, signal
 from piko import episode, roll, loadq, saveq, setparams
 
 DBNAME = 'q.db'
 EPISODES = 500000
 STEP = 10000
+running = True
 
 def main(argv=sys.argv):
     # target param
@@ -20,7 +21,7 @@ def main(argv=sys.argv):
     # counters
     won = all = rate = gain = 0
     time0 = time.time()
-    while True:
+    while running:
         state,reward = episode(([0,0,0,0,0,0], roll(8)), q)
         if (target==0 and reward>0) or (reward==target):
             won += 1
@@ -37,6 +38,13 @@ def main(argv=sys.argv):
             break    
     saveq(DBNAME, q)
 
-
+def stop(signum, frame):
+    print 'stopping...'
+    global running
+    running = False
+    
 if __name__ == "__main__":
+    # sigterm
+    signal.signal(signal.SIGINT, stop)
+    signal.signal(signal.SIGTERM, stop)
     main()
