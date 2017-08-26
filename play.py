@@ -18,13 +18,37 @@ def main(argv=sys.argv):
     # start game
     while True:
         # my turn
-        print my_state
-        tile = my_roll(my_state[0][0])
+        print 'your turn:', my_state
+        tile = my_roll(tiles[0])
         my_state = strategy.transition(my_state, tile)
+        ai_state = (tiles, mine, strategy.score(mine), opponent, strategy.score(opponent))
         if tile<0:
             print 'you lose one tile'
         else:
             print 'you take tile', my_state[3][-1]
+        if not tiles:
+            end_game(my_state)
+            return 0
+        # AI turn
+        action = strategy.policy(ai_state, q)        
+        _,tile = piko.episode(([0,0,0,0,0,0], piko.roll(8)), strategy.loadq(action))
+        if tile<0 or tile<tiles[0]:
+            print 'AI loses one tile'
+        ai_state = strategy.transition(ai_state, tile)
+        my_state = (tiles, opponent, strategy.score(opponent), mine, strategy.score(mine))
+        if tile>0:
+            print 'AI takes tile', ai_state[3][-1]
+        if not tiles:
+            end_game(my_state)
+            return 0
+
+def end_game(state):
+    if state[2] > state[4]:
+        print 'you lose %d/%d' % (state[2], state[4])
+    elif state[4] > state[2]:
+        print 'you win %d/%d' % (state[4], state[2])
+    else:
+        print 'draw %d/%d' % (state[4], state[2])
 
 def my_roll(smallest):
     dices = 8

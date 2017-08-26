@@ -6,7 +6,7 @@ from strategy import episode, setparams
 
 DBNAME = 'strategy.db'
 EPISODES = 10000
-STEP = 100
+STEP = 1000
 running = True
 
 def main():

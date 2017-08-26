@@ -55,7 +55,7 @@ def episode(q):
     return state,reward,state[4]
 
 def transition(state,action):
-    if action == state[1]:
+    if state[1] and action==state[1][-1]:
         # take tile of opponent
         state[3].append(state[1].pop())
     else:
@@ -69,9 +69,9 @@ def transition(state,action):
         else:
             # new tile on top of mine
             state[3].append(tile)
-    return (tiles,
-            state[1], _score(state[1]),
-            state[3], _score(state[3])
+    return (state[0],
+            state[1], score(state[1]),
+            state[3], score(state[3])
     )
 
 def _tiles(tiles):
@@ -81,7 +81,7 @@ def _tiles(tiles):
         mask &= 2 << (t-21)
     return mask
 
-def _score(tiles):
+def score(tiles):
     """ Return score yielded by array of tiles """
     score = 0
     for t in tiles:
