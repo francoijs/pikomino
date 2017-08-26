@@ -5,7 +5,7 @@ import piko
 from strategy import episode, setparams
 
 DBNAME = 'strategy.db'
-EPISODES = 1000
+EPISODES = 10000
 STEP = 100
 running = True
 
@@ -17,15 +17,15 @@ def main():
     won = all = rate = gain = 0
     time0 = time.time()
     while running:
-        state,reward = episode(q)
+        state,reward,score = episode(q)
         if reward>0:
             won += 1
-            gain += reward
+            gain += score
         all += 1
         if not all % STEP:
             perf = (time.time() - time0) * float(1000) / STEP
             rate = 100 * float(won)/STEP
-            print 'games: %d / won: %.1f%% of last %d / avg gain: %.1f / time: %.3fms/game' % (all, rate, STEP, float(gain)/won if won else 0, perf)
+            print 'games: %d / won: %.1f%% of last %d / avg score: %.1f / time: %.3fms/game' % (all, rate, STEP, float(gain)/won if won else 0, perf)
             won = 0
             gain = 0
             time0 = time.time()

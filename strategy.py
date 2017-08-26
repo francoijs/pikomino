@@ -16,7 +16,7 @@ def setparams(alpha, epsilon, log=False):
     LOG = log
 
 def episode(q):
-    """ Run an episode and return final state and reward """
+    """ Run an episode and return final state, reward, score """
     mine = []
     opponent = []
     tiles = sortedlist(range(21,37))
@@ -40,32 +40,9 @@ def episode(q):
             _, score = piko.episode(([0,0,0,0,0,0], piko.roll(8)), loadq(action))
             if LOG:
                 print 'my roll:' if my_turn else 'opponent roll:', score
-            if score == state[1]:
-                # take tile of opponent
-                state[3].append(state[1].pop())
-                state = (tiles,
-                         state[1], _score(state[1]),
-                         state[3], _score(state[3])
-                )
-                reward = 0
-                qsa = max([getq(q,state,a) for a in range(37)])
-            else:
-                tiles,tile = _take(tiles, score)
-                if not tile:
-                    # no tile available with this score -> give back 1 tile
-                    if state[3]:
-                        tiles = _give(tiles, state[3].pop())
-                    elif tiles:
-                        tiles.pop()
-                else:
-                    # new tile on top of mine
-                    state[3].append(tile)
-                state = (tiles,
-                         state[1], _score(state[1]),
-                         state[3], _score(state[3])
-                )
-                reward = 0
-                qsa = max([getq(q,state,a) for a in range(37)])
+            state = transition(state, score)
+            reward = 0
+            qsa = max([getq(q,state,a) for a in range(37)])
         # update q(state0,action)
         old = getq(q, state0, action)
         new = old + ALPHA * ( reward + qsa - old )
@@ -75,7 +52,27 @@ def episode(q):
         if reward != 0:
             break
         my_turn = not my_turn
-    return state,reward
+    return state,reward,state[4]
+
+def transition(state,action):
+    if action == state[1]:
+        # take tile of opponent
+        state[3].append(state[1].pop())
+    else:
+        tiles,tile = _take(state[0], action)
+        if not tile:
+            # no tile available with this action -> give back 1 tile
+            if state[3]:
+                tiles = _give(tiles, state[3].pop())
+            if tiles:
+                tiles.pop()
+        else:
+            # new tile on top of mine
+            state[3].append(tile)
+    return (tiles,
+            state[1], _score(state[1]),
+            state[3], _score(state[3])
+    )
 
 def _tiles(tiles):
     """ Return mask of tiles as a 16-bit integer (bit 0 for 21) """
