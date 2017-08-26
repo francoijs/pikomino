@@ -64,7 +64,7 @@ def policy(state, q):
     # return best action
     return candidates[ max(range(len(candidates)), key=lambda i: getq(q,state,candidates[i])) ]
 
-def find_candidates(state):
+def find_candidates(state, smallest=21):
     """ Return list of candidates actions """
     # dices that may be kept before rerolling
     candidates = [n for n in range(6) if state[1][n]>0 and state[0][n]==0]
@@ -73,11 +73,11 @@ def find_candidates(state):
     for action in candidates:
         if action==0:
             new_score = total(state) + state[1][0]*5
-            if new_score>20:
+            if new_score >= smallest:
                 stop.append(6)
         else:
             new_score = total(state) + state[1][action]*action
-            if state[0][0] and new_score>20:
+            if state[0][0] and new_score >= smallest:
                 stop.append(6+action)
     return candidates + stop
 

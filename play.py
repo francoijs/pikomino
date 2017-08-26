@@ -19,24 +19,29 @@ def main(argv=sys.argv):
     while True:
         # my turn
         print my_state
-        tile = my_roll()
+        tile = my_roll(my_state[0][0])
         my_state = strategy.transition(my_state, tile)
         if tile<0:
             print 'you lose one tile'
         else:
             print 'you take tile', my_state[3][-1]
 
-def my_roll():
+def my_roll(smallest):
     dices = 8
     state = ([0,0,0,0,0,0], piko.roll(8))
     while True:
         print 'state: %s / total: %d' % (state, piko.total(state))
-        candidates = piko.find_candidates(state)
+        candidates = piko.find_candidates(state, smallest)
         if not candidates:
             return -1
         action = -1
         while action not in candidates:
-            action = input('choose action %s: ' % (candidates))
+            try:
+                action = input('choose action %s: ' % (candidates))
+            except KeyboardInterrupt:
+                sys.exit()
+            except:
+                action = -1
         if action>5:
             # keep some dices then stop
             state[0][action-6] += state[1][action-6]

@@ -75,7 +75,7 @@ def transition(state,action):
     )
 
 def _tiles(tiles):
-    """ Return mask of tiles as a 16-bit integer (bit 0 for 21) """
+    """ Return mask of tiles as a 16-bit integer (bit 0 for tile 21) """
     mask = 0
     for t in tiles:
         mask &= 2 << (t-21)
