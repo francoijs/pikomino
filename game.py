@@ -9,8 +9,8 @@ def main():
     # playing mode
     setparams(0, 0, log=True)
     q = piko.loadq(DBNAME)
-    state,reward = episode(q)
-    print 'end:',state,reward
+    state,reward,score = episode(q)
+    print 'end:',state,reward,score
 
 
 if __name__ == "__main__":

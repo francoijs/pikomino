@@ -108,11 +108,6 @@ def roll(n):
 
 def _hash(state, action):
     return hash( (tuple(state[0]), tuple(state[1]), action) )
-    # h = 0
-    # for b in state[0] + state[1] + [action]:
-    #     h = (h<<4) + b
-    # print h
-    # return h
 def getq(q, state, action):
     return q.get(_hash(state,action), 0)
 def setq(q, state, action, val):

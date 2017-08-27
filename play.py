@@ -35,10 +35,10 @@ def main(argv=sys.argv):
         num_tiles = len(opponent)
         ai_state = strategy.transition(ai_state, tile)
         my_state = (tiles, opponent, strategy.score(opponent), mine, strategy.score(mine))
-        if len(opponent) < num_tiles:
-            print 'AI loses one tile'
-        else:
+        if len(opponent) > num_tiles:
             print 'AI takes tile', opponent[-1]
+        else:
+            print 'AI loses one tile'
         if not tiles:
             end_game(my_state)
             return 0

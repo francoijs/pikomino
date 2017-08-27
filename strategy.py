@@ -16,7 +16,7 @@ def setparams(alpha, epsilon, log=False):
     LOG = log
 
 def episode(q):
-    """ Run an episode and return final state, reward, score """
+    """ Run an episode and return final state, reward, my score """
     mine = []
     opponent = []
     tiles = sortedlist(range(21,37))
@@ -31,13 +31,17 @@ def episode(q):
         action = policy(state, q)
         if action == -1:
             # game is over
-            if state[2] > state[4]:
-                qsa = reward = -1
+            if state[2] < state[4]:
+                qsa = reward = 1    # win
             else:
-                qsa = reward = 1
+                qsa = reward = -1   # loss or draw
         else:
+            if action==0 or len(state[1])==0:
+                target_q = loadq(0)   # aim at biggest possible tile
+            else:
+                target_q = loadq(state[1][-1])   # aim at opponent tile
             # roll
-            _, score = piko.episode(([0,0,0,0,0,0], piko.roll(8)), loadq(action))
+            _, score = piko.episode(([0,0,0,0,0,0], piko.roll(8)), target_q)
             if LOG:
                 print 'my roll:' if my_turn else 'opponent roll:', score
             state = transition(state, score)
@@ -74,15 +78,8 @@ def transition(state,action):
             state[3], score(state[3])
     )
 
-def _tiles(tiles):
-    """ Return mask of tiles as a 16-bit integer (bit 0 for tile 21) """
-    mask = 0
-    for t in tiles:
-        mask &= 2 << (t-21)
-    return mask
-
 def score(tiles):
-    """ Return score yielded by array of tiles """
+    """ Return score yielded by a set of tiles """
     score = 0
     for t in tiles:
         if   t<25: score += 1
@@ -105,8 +102,8 @@ def _give(tiles,tile):
 def policy(state, q):
     """
     Return preferred action for the given state:
-    - a is 0: make biggest possible score
-    - a in [21-36]: aim for specific tile
+    - 0: make biggest possible score
+    - 1: aim for tile of opponent
     """
     candidates = []
     # remaining tiles?
@@ -116,7 +113,7 @@ def policy(state, q):
     candidates += [0]
     # tile of opponent
     if state[1]:
-        candidates = candidates + [ state[1][-1] ]
+        candidates = candidates + [1]
     if random.random() < EPSILON:
         # exploration
         return random.choice(candidates)
@@ -124,9 +121,9 @@ def policy(state, q):
     return candidates[ max(range(len(candidates)), key=lambda i: getq(q,state,candidates[i])) ]
 
 def _hash(state, action):
-    return hash( (_tiles(state[0]),
-                  0 if not state[1] else state[1][-1], state[2],
-                  0 if not state[3] else state[3][-1], state[4]) )
+    return hash(( tuple(state[0]),                                 # sorted available tiles
+                  0 if not state[1] else state[1][-1], state[2],   # opponent top tile and score
+                  0 if not state[3] else state[3][-1], state[4] )) # my top tile and score
 def getq(q, state, action):
     return q.get(_hash(state,action), 0)
 def setq(q, state, action, val):

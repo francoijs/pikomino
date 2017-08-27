@@ -5,7 +5,7 @@ import piko
 from strategy import episode, setparams
 
 DBNAME = 'strategy.db'
-EPISODES = 10000
+EPISODES = 100000
 STEP = 1000
 running = True
 
