@@ -13,6 +13,7 @@ def setparams(alpha, epsilon, log=False):
     global ALPHA, EPSILON, LOG
     ALPHA = alpha
     EPSILON = epsilon
+    print 'alpha=%.1f / epsilon=%.1f' % (ALPHA, EPSILON)
     LOG = log
 
 def episode(q):
@@ -41,12 +42,13 @@ def episode(q):
             else:
                 target_q = loadq(state[1][-1])   # aim at opponent tile
             # roll
-            _, score = piko.episode(([0,0,0,0,0,0], piko.roll(8)), target_q)
+            roll_state,_ = piko.episode(([0,0,0,0,0,0], piko.roll(8)), target_q)
+            score = piko.score(roll_state)
             if LOG:
                 print 'my roll:' if my_turn else 'opponent roll:', score
             state = transition(state, score)
             reward = 0
-            qsa = max([getq(q,state,a) for a in range(37)])
+            qsa = max([getq(q,state,a) for a in range(2)])
         # update q(state0,action)
         old = getq(q, state0, action)
         new = old + ALPHA * ( reward + qsa - old )
@@ -58,14 +60,14 @@ def episode(q):
         my_turn = not my_turn
     return state,reward,state[4]
 
-def transition(state,action):
-    if state[1] and action==state[1][-1]:
+def transition(state, roll):
+    if state[1] and roll==state[1][-1]:
         # take tile of opponent
         state[3].append(state[1].pop())
     else:
-        tiles,tile = _take(state[0], action)
+        tiles,tile = _take(state[0], roll)
         if not tile:
-            # no tile available with this action -> give back 1 tile
+            # no tile available with this roll -> give back 1 tile
             if state[3]:
                 tiles = _give(tiles, state[3].pop())
             if tiles:
@@ -121,9 +123,10 @@ def policy(state, q):
     return candidates[ max(range(len(candidates)), key=lambda i: getq(q,state,candidates[i])) ]
 
 def _hash(state, action):
-    return hash(( tuple(state[0]),                                 # sorted available tiles
-                  0 if not state[1] else state[1][-1], state[2],   # opponent top tile and score
-                  0 if not state[3] else state[3][-1], state[4] )) # my top tile and score
+    return hash(( 0 if not state[0] else min(state[0]),  # smallest available tile
+                  0 if not state[1] else state[1][-1],   # opponent top tile
+                  state[4] - state[2],                   # score delta
+                  action ))                              # action
 def getq(q, state, action):
     return q.get(_hash(state,action), 0)
 def setq(q, state, action, val):

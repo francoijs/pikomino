@@ -8,6 +8,7 @@ DBNAME = 'strategy.db'
 def main(argv=sys.argv):
     # playing mode
     strategy.setparams(0, 0, log=True)
+    piko.setparams(0, 0)
     q = piko.loadq(DBNAME)
     # game elements
     mine = []
@@ -30,8 +31,13 @@ def main(argv=sys.argv):
             end_game(my_state)
             return 0
         # AI turn
-        action = strategy.policy(ai_state, q)        
-        _,tile = piko.episode(([0,0,0,0,0,0], piko.roll(8)), strategy.loadq(action))
+        action = strategy.policy(ai_state, q)
+        if action == 0:
+            target = 0
+        else:
+            target = mine[-1]
+        roll_state,_ = piko.episode(([0,0,0,0,0,0], piko.roll(8)), strategy.loadq(target))
+        tile = piko.score(roll_state)
         num_tiles = len(opponent)
         ai_state = strategy.transition(ai_state, tile)
         my_state = (tiles, opponent, strategy.score(opponent), mine, strategy.score(mine))

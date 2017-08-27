@@ -7,9 +7,10 @@ LOG = False
 TARGET = 0     # target tile (0 for the largest possible)
 
 def setparams(alpha, epsilon, log=False, target=0):
-    global ALPHA, EPSILON, LOG
+    global ALPHA, EPSILON, LOG, TARGET
     ALPHA = alpha
     EPSILON = epsilon
+    print 'alpha=%.1f / epsilon=%.1f' % (ALPHA, EPSILON)
     LOG = log
     TARGET = target
 
@@ -30,7 +31,7 @@ def episode(state, q):
             elif tile == TARGET:
                 qsa = reward = 100
             else:
-                qsa = reward = tile
+                qsa = reward = -100
             state = (state[0], [0,0,0,0,0,0])
         else:
             # keep some dices then reroll

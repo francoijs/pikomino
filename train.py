@@ -23,7 +23,7 @@ def main(argv=sys.argv):
     time0 = time.time()
     while running:
         state,reward = episode(([0,0,0,0,0,0], roll(8)), q)
-        if (target==0 and reward>0) or (reward==target):
+        if (target==0 and reward>0) or (reward==100):
             won += 1
             gain += reward
         all += 1
