@@ -25,19 +25,20 @@ def main(argv=sys.argv):
         if tile<0:
             print 'you lose one tile'
         else:
-            print 'you take tile', my_state[3][-1]
+            print 'you take tile', mine[-1]
         if not tiles:
             end_game(my_state)
             return 0
         # AI turn
         action = strategy.policy(ai_state, q)        
         _,tile = piko.episode(([0,0,0,0,0,0], piko.roll(8)), strategy.loadq(action))
-        if tile<0 or tile<tiles[0]:
-            print 'AI loses one tile'
+        num_tiles = len(opponent)
         ai_state = strategy.transition(ai_state, tile)
         my_state = (tiles, opponent, strategy.score(opponent), mine, strategy.score(mine))
-        if tile>0:
-            print 'AI takes tile', ai_state[3][-1]
+        if len(opponent) < num_tiles:
+            print 'AI loses one tile'
+        else:
+            print 'AI takes tile', opponent[-1]
         if not tiles:
             end_game(my_state)
             return 0
