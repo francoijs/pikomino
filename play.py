@@ -20,7 +20,10 @@ def main(argv=sys.argv):
     while True:
         # my turn
         print 'your turn:', my_state
-        tile = my_roll(tiles[0])
+        smallest = [tiles[0]]
+        if opponent:
+            smallest = smallest + [opponent[-1]]
+        tile = my_roll(min(smallest))
         my_state = strategy.transition(my_state, tile)
         ai_state = (tiles, mine, strategy.score(mine), opponent, strategy.score(opponent))
         if tile<0:
@@ -36,6 +39,7 @@ def main(argv=sys.argv):
             target = 0
         else:
             target = mine[-1]
+            print 'AI is sniping your tile', target
         roll_state,_ = piko.episode(([0,0,0,0,0,0], piko.roll(8)), strategy.loadq(target))
         tile = piko.score(roll_state)
         num_tiles = len(opponent)

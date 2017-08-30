@@ -22,6 +22,7 @@ def episode(q):
     opponent = []
     tiles = sortedlist(range(21,37))
     state = (tiles, opponent, 0, mine, 0)
+    mark = all_mark = 0
     my_turn = True
     while True:
         if my_turn:
@@ -42,8 +43,12 @@ def episode(q):
             else:
                 target_q = loadq(state[1][-1])   # aim at opponent tile
             # roll
-            roll_state,_ = piko.episode(([0,0,0,0,0,0], piko.roll(8)), target_q)
+            roll_state,roll_reward = piko.episode(([0,0,0,0,0,0], piko.roll(8)), target_q)
             score = piko.score(roll_state)
+            if action > 0:
+                all_mark += 1
+                if roll_reward > 0:
+                    mark += 1   # sniping succeeded
             if LOG:
                 print 'my roll:' if my_turn else 'opponent roll:', score
             state = transition(state, score)
@@ -58,7 +63,8 @@ def episode(q):
         if reward != 0:
             break
         my_turn = not my_turn
-    return state,reward,state[4]
+    mark_rate = 0 if all_mark==0 else float(mark)/all_mark
+    return state, reward, state[4], mark_rate
 
 def transition(state, roll):
     if state[1] and roll==state[1][-1]:
