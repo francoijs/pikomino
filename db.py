@@ -11,6 +11,10 @@ def main(argv=sys.argv):
         DBNAME = 'q%02d.db' % (int(argv[1]))
     q = piko.loadq(DBNAME)
     print '%s: %d items' % (DBNAME, len(q))
+    print 'min: %.02f / max: %.02f / avg: %.02f / zeros: %.1f%%' % (
+        min(q.values()), max(q.values()), sum(q.values())/len(q),
+        100*len([p for p in q.values() if p==0])/len(q)
+    )
     for idx in range(10):
         print '%s -> %.02f' % (q.keys()[idx], q.values()[idx])
 
