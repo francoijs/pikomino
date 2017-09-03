@@ -16,29 +16,14 @@ def setparams(alpha, epsilon, log=False, target=0):
 
 def episode(state, q):
     """ Run an episode and return final state and reward """
+    # eligibility traces for this episode (no decay)
+    traces = []
     while True:
         state0 = copy.deepcopy(state)
         action = policy(state, q)
-        if action == -1:
-            # roll is lost
-            qsa = reward = -100
-        elif action > 5:
-            # keep some dices then stop
-            state[0][action-6] += state[1][action-6]
-            tile = score(state)
-            if TARGET == 0:
-                qsa = reward = score(state)
-            elif tile == TARGET:
-                qsa = reward = 100
-            else:
-                qsa = reward = -100
-            state = (state[0], [0,0,0,0,0,0])
-        else:
-            # keep some dices then reroll
-            state[0][action] += state[1][action]
-            reward = 0
-            state = (state[0], roll(8-sum(state[0])))
-            qsa = max([getq(q,state,a) for a in range(12)])
+        state, reward, qsa = transition(state, action, q)
+        # record trace
+#        traces.append( (state0, action) )
         # update q(state0,action)
         old = getq(q, state0, action)
         new = old + ALPHA * ( reward + qsa - old )
@@ -47,7 +32,15 @@ def episode(state, q):
             print state0, '--|%d|->' % (action), state
         if reward != 0:
             break
-    return state,reward
+    reward1 = reward
+    # update back traces
+    while traces:
+        trace = traces.pop()
+        old = getq(q, trace[0], trace[1])
+        _,reward,qsa = transition(trace[0], trace[1], q)
+        new = old + ALPHA * ( reward + qsa - old )
+        setq(q, trace[0], trace[1], new)
+    return state,reward1
 
 def policy(state, q):
     """
@@ -82,10 +75,32 @@ def find_candidates(state, smallest=21):
                 stop.append(6+action)
     return candidates + stop
 
-def transition(state0, action):
-    state = copy.deepcopy(state0)
-    state[0][action] += state[1][action]
-    return state
+def transition(state, action, q):
+    if action == -1:
+        # roll is lost
+        qsa = reward = -100
+    elif action > 5:
+        # keep some dices then stop
+        state[0][action-6] += state[1][action-6]
+        tile = score(state)
+        if TARGET == 0:
+            qsa = reward = score(state)
+        elif tile == TARGET:
+            qsa = reward = 100
+        else:
+            qsa = reward = -100
+            state = (state[0], [0,0,0,0,0,0])
+    else:
+        # keep some dices then reroll
+        state[0][action] += state[1][action]
+        reward = 0
+        state = (state[0], roll(8-sum(state[0])))
+        candidates = find_candidates(state)
+        if candidates:
+            qsa = max([getq(q,state,a) for a in candidates])
+        else:
+            qsa = 0
+    return state, reward, qsa
 
 def total(state):
     return 5*state[0][0] + sum([n*state[0][n] for n in range(6)])

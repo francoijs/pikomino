@@ -16,7 +16,7 @@ def main(argv=sys.argv):
         target = int(argv[1])
     DBNAME = 'q%02d.db' % (target)
     # learning mode
-    setparams(0.3, 0.1, target=target)
+    setparams(0.8, 0.1, target=target)
     q = loadq(DBNAME)
     # counters
     won = all = rate = gain = 0
