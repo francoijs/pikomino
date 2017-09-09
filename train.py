@@ -3,11 +3,12 @@
 import time, sys, signal, random
 from piko import episode, roll, setparams
 from q_hash import HashQ
+from q_network import NetworkQ
 
 
 DBNAME = 'q.db'
-EPISODES = 1000000
-STEP = 10000
+EPISODES = 1500
+STEP = 100
 running = True
 
 def main(argv=sys.argv):
@@ -19,7 +20,7 @@ def main(argv=sys.argv):
     DBNAME = 'q%02d.db' % (target)
     # learning mode
     setparams(0.8, 0.1, target=target)
-    q = HashQ(DBNAME)
+    q = NetworkQ(DBNAME)
     # counters
     won = all = rate = gain = 0
     time0 = time.time()
