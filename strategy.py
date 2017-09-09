@@ -1,4 +1,6 @@
 import piko, copy, random, bisect
+from q_hash import HashQ
+
 
 LOG = False
 ALPHA = 0.3    # learning rate
@@ -57,14 +59,14 @@ def episode(q):
                 print 'my roll:' if my_turn else 'opponent roll:', score
             state = transition(state, score)
             reward = 0
-            qsa = max([getq(q,state,a) for a in range(2)])
+            qsa = max([q.get(state,a) for a in range(2)])
         # record trace
         # FIXME: disabled, no apparent effect on perfs
         traces.append( (state0, action, reward+qsa) )
         # update q(state0,action)
-        old = getq(q, state0, action)
+        old = q.get(state0, action)
         new = old + ALPHA * ( reward + qsa - old )
-        setq(q, state0, action, new)
+        q.set(state0, action, new)
         if LOG:
             print state0, '--|%d|->' % (action), state
         if reward != 0:
@@ -74,9 +76,9 @@ def episode(q):
     # update back traces
     while traces:
         trace = traces.pop()
-        old = getq(q, trace[0], trace[1])
+        old = q.get(trace[0], trace[1])
         new = old + ALPHA * ( trace[2] - old )
-        setq(q, trace[0], trace[1], new)        
+        q.set(trace[0], trace[1], new)        
     return state, reward, state[4], mark_rate
 
 def transition(state, roll):
@@ -139,20 +141,10 @@ def policy(state, q):
         # exploration
         return random.choice(candidates)
     # return best action
-    return candidates[ max(range(len(candidates)), key=lambda i: getq(q,state,candidates[i])) ]
-
-def _hash(state, action):
-    return hash(( 0 if not state[0] else min(state[0]),  # smallest available tile
-                  0 if not state[1] else state[1][-1],   # opponent top tile
-                  state[4] - state[2],                   # score delta
-                  action ))                              # action
-def getq(q, state, action):
-    return q.get(_hash(state,action), 0)
-def setq(q, state, action, val):
-    q[_hash(state,action)] = val
+    return candidates[ max(range(len(candidates)), key=lambda i: q.get(state,candidates[i])) ]
 
 allq = {}
 def loadq(action):
     if action not in allq:
-        allq[action] = piko.loadq('q%02d.db' % (action))
+        allq[action] = HashQ('q%02d.db' % (action))
     return allq[action]

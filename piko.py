@@ -1,5 +1,5 @@
 import random, copy, math, collections, os, time
-import cPickle as pickle
+
 
 ALPHA = 0.3    # learning rate
 EPSILON = 0.1
@@ -26,9 +26,9 @@ def episode(state, q):
         # FIXME: disabled, not apparent effect on perfs
 #        traces.append( (state0, action) )
         # update q(state0,action)
-        old = getq(q, state0, action)
+        old = q.get(state0, action)
         new = old + ALPHA * ( reward + qsa - old )
-        setq(q, state0, action, new)
+        q.set(state0, action, new)
         if LOG:
             print state0, '--|%d|->' % (action), state
         if reward != 0:
@@ -37,10 +37,10 @@ def episode(state, q):
     # update back traces
     while traces:
         trace = traces.pop()
-        old = getq(q, trace[0], trace[1])
+        old = q.get(trace[0], trace[1])
         _,reward,qsa = transition(trace[0], trace[1], q)
         new = old + ALPHA * ( reward + qsa - old )
-        setq(q, trace[0], trace[1], new)
+        q.set(trace[0], trace[1], new)
     return state,reward1
 
 def policy(state, q):
@@ -57,7 +57,7 @@ def policy(state, q):
         # exploration
         return random.choice(candidates)
     # return best action
-    return candidates[ max(range(len(candidates)), key=lambda i: getq(q,state,candidates[i])) ]
+    return candidates[ max(range(len(candidates)), key=lambda i: q.get(state,candidates[i])) ]
 
 def find_candidates(state):
     """ Return list of candidates actions """
@@ -99,7 +99,7 @@ def transition(state, action, q):
         state = (state[0], roll(8-sum(state[0])), state[2])
         candidates = find_candidates(state)
         if candidates:
-            qsa = max([getq(q,state,a) for a in candidates])
+            qsa = max([q.get(state,a) for a in candidates])
         else:
             qsa = 0
     return state, reward, qsa
@@ -123,25 +123,3 @@ def roll(n):
     for d in draw:
         roll[d] += 1
     return roll
-
-def _hash(state, action):
-    return hash( (tuple(state[0]), tuple(state[1]), state[2], action) )
-def getq(q, state, action):
-    return q.get(_hash(state,action), 0)
-def setq(q, state, action, val):
-    q[_hash(state,action)] = val
-    
-def loadq(fname):
-    if not os.path.isfile(fname):
-        print 'creating empty db'
-        q = {}
-    else:
-        with open(fname, 'rb') as file:
-            q = pickle.load(file)
-        print 'loaded %d q-values from' % (len(q)), fname
-    return q
-    
-def saveq(fname, q):
-    with open(fname, 'wb') as file:
-        pickle.dump(q, file, pickle.HIGHEST_PROTOCOL)
-    print '%d q-values saved to' % (len(q)), fname

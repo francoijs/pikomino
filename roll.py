@@ -1,7 +1,9 @@
 #!/usr/bin/python
 
 import time, sys
-from piko import episode, roll, loadq, setparams
+from piko import episode, roll, setparams
+from q_hash import HashQ
+
 
 DBNAME = 'q.db'
 
@@ -14,7 +16,7 @@ def main(argv=sys.argv):
     DBNAME = 'q%02d.db' % (target)
     # playing mode
     setparams(0, 0, log=True, target=target)
-    q = loadq(DBNAME)
+    q = HashQ(DBNAME)
     state,reward = episode(([0,0,0,0,0,0], roll(8), 21), q)
     print 'end:',state,reward
 

@@ -3,6 +3,8 @@
 import time, sys, signal
 import piko
 from strategy import episode, setparams
+from q_hash import StrategyHashQ
+
 
 DBNAME = 'strategy.db'
 EPISODES = 100000
@@ -12,7 +14,7 @@ running = True
 def main():
     # learning mode
     setparams(0.3, 0.1)
-    q = piko.loadq(DBNAME)
+    q = StrategyHashQ(DBNAME)
     # counters
     won = all = rate = gain = mark = tot_mark = 0
     time0 = time.time()
@@ -35,7 +37,7 @@ def main():
             time0 = time.time()
         if all == EPISODES:
             break    
-    piko.saveq(DBNAME, q)
+    q.save()
 
 def stop(signum, frame):
     print 'stopping...'

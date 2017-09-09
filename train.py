@@ -1,7 +1,9 @@
 #!/usr/bin/python
 
 import time, sys, signal, random
-from piko import episode, roll, loadq, saveq, setparams
+from piko import episode, roll, setparams
+from q_hash import HashQ
+
 
 DBNAME = 'q.db'
 EPISODES = 1000000
@@ -17,7 +19,7 @@ def main(argv=sys.argv):
     DBNAME = 'q%02d.db' % (target)
     # learning mode
     setparams(0.8, 0.1, target=target)
-    q = loadq(DBNAME)
+    q = HashQ(DBNAME)
     # counters
     won = all = rate = gain = 0
     time0 = time.time()
@@ -40,7 +42,7 @@ def main(argv=sys.argv):
             time0 = time.time()
         if all == EPISODES:
             break    
-    saveq(DBNAME, q)
+    q.save()
 
 def stop(signum, frame):
     print 'stopping...'
