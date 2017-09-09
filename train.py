@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import time, sys, signal
+import time, sys, signal, random
 from piko import episode, roll, loadq, saveq, setparams
 
 DBNAME = 'q.db'
@@ -22,7 +22,11 @@ def main(argv=sys.argv):
     won = all = rate = gain = 0
     time0 = time.time()
     while running:
-        state,reward = episode(([0,0,0,0,0,0], roll(8)), q)
+        if target == 0:
+            smallest = random.randint(21,36)
+        else:
+            smallest = 21
+        state,reward = episode(([0,0,0,0,0,0], roll(8), smallest), q)
         if (target==0 and reward>0) or (reward==100):
             won += 1
             gain += reward

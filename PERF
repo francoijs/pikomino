@@ -1,0 +1,8 @@
+train 0:
+with traces / eps=0.1 / alpha=0.8
+69% after 1M episodes
+72% after 2M episodes
+
+without traces / eps=0.1 / alpha=0.8
+68% after 1M episodes
+73% after 2M episodes

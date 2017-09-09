@@ -24,6 +24,8 @@ def episode(q):
     state = (tiles, opponent, 0, mine, 0)
     mark = all_mark = 0
     my_turn = True
+    # eligibility traces for this episode (no decay)
+    traces = []
     while True:
         if my_turn:
             state = (tiles, opponent, state[4], mine, state[2])
@@ -39,11 +41,13 @@ def episode(q):
                 qsa = reward = -1   # loss or draw
         else:
             if action==0 or len(state[1])==0:
-                target_q = loadq(0)   # aim at biggest possible tile
+                target_q = loadq(0)   # regular roll
+                smallest = min([tiles[0]] + [opp[-1] for opp in [state[1]] if opp])
             else:
                 target_q = loadq(state[1][-1])   # aim at opponent tile
+                smallest = 21
             # roll
-            roll_state,roll_reward = piko.episode(([0,0,0,0,0,0], piko.roll(8)), target_q)
+            roll_state,roll_reward = piko.episode(([0,0,0,0,0,0], piko.roll(8), smallest), target_q)
             score = piko.score(roll_state)
             if action > 0:
                 all_mark += 1
@@ -54,6 +58,9 @@ def episode(q):
             state = transition(state, score)
             reward = 0
             qsa = max([getq(q,state,a) for a in range(2)])
+        # record trace
+        # FIXME: disabled, no apparent effect on perfs
+        traces.append( (state0, action, reward+qsa) )
         # update q(state0,action)
         old = getq(q, state0, action)
         new = old + ALPHA * ( reward + qsa - old )
@@ -64,6 +71,12 @@ def episode(q):
             break
         my_turn = not my_turn
     mark_rate = 0 if all_mark==0 else float(mark)/all_mark
+    # update back traces
+    while traces:
+        trace = traces.pop()
+        old = getq(q, trace[0], trace[1])
+        new = old + ALPHA * ( trace[2] - old )
+        setq(q, trace[0], trace[1], new)        
     return state, reward, state[4], mark_rate
 
 def transition(state, roll):

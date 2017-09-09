@@ -15,7 +15,7 @@ def main(argv=sys.argv):
     # playing mode
     setparams(0, 0, log=True, target=target)
     q = loadq(DBNAME)
-    state,reward = episode(([0,0,0,0,0,0], roll(8)), q)
+    state,reward = episode(([0,0,0,0,0,0], roll(8), 21), q)
     print 'end:',state,reward
 
 

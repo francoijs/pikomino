@@ -23,6 +23,7 @@ def episode(state, q):
         action = policy(state, q)
         state, reward, qsa = transition(state, action, q)
         # record trace
+        # FIXME: disabled, not apparent effect on perfs
 #        traces.append( (state0, action) )
         # update q(state0,action)
         old = getq(q, state0, action)
@@ -58,7 +59,7 @@ def policy(state, q):
     # return best action
     return candidates[ max(range(len(candidates)), key=lambda i: getq(q,state,candidates[i])) ]
 
-def find_candidates(state, smallest=21):
+def find_candidates(state):
     """ Return list of candidates actions """
     # dices that may be kept before rerolling
     candidates = [n for n in range(6) if state[1][n]>0 and state[0][n]==0]
@@ -67,11 +68,12 @@ def find_candidates(state, smallest=21):
     for action in candidates:
         if action==0:
             new_score = total(state) + state[1][0]*5
-            if new_score >= smallest:
+            if new_score >= state[2]:
                 stop.append(6)
         else:
+            # cannot stop if score not at least bigger than the smallest available tile
             new_score = total(state) + state[1][action]*action
-            if state[0][0] and new_score >= smallest:
+            if state[0][0] and new_score >= state[2]:
                 stop.append(6+action)
     return candidates + stop
 
@@ -94,7 +96,7 @@ def transition(state, action, q):
         # keep some dices then reroll
         state[0][action] += state[1][action]
         reward = 0
-        state = (state[0], roll(8-sum(state[0])))
+        state = (state[0], roll(8-sum(state[0])), state[2])
         candidates = find_candidates(state)
         if candidates:
             qsa = max([getq(q,state,a) for a in candidates])
@@ -123,7 +125,7 @@ def roll(n):
     return roll
 
 def _hash(state, action):
-    return hash( (tuple(state[0]), tuple(state[1]), action) )
+    return hash( (tuple(state[0]), tuple(state[1]), state[2], action) )
 def getq(q, state, action):
     return q.get(_hash(state,action), 0)
 def setq(q, state, action, val):

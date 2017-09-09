@@ -22,14 +22,19 @@ def main(argv=sys.argv):
         print 'your turn:', my_state
         smallest = [tiles[0]]
         if opponent:
-            smallest = smallest + [opponent[-1]]
+            opp = opponent[-1]
+            smallest = smallest + [opp]
+        else:
+            opp = 0
         tile = my_roll(min(smallest))
         my_state = strategy.transition(my_state, tile)
         ai_state = (tiles, mine, strategy.score(mine), opponent, strategy.score(opponent))
-        if tile<0:
-            print 'you lose one tile'
-        else:
+        if opp and tile==opp:
+            print 'you steal tile', tile
+        elif mine and tile>=mine[-1]:
             print 'you take tile', mine[-1]
+        else:
+            print 'you lose one tile'
         if not tiles:
             end_game(my_state)
             return 0
@@ -40,7 +45,11 @@ def main(argv=sys.argv):
         else:
             target = mine[-1]
             print 'AI is sniping your tile', target
-        roll_state,_ = piko.episode(([0,0,0,0,0,0], piko.roll(8)), strategy.loadq(target))
+        if target == 0:
+            smallest = min([tiles[0]] + [opp[-1] for opp in [mine] if opp])
+        else:
+            smallest = 21
+        roll_state,_ = piko.episode(([0,0,0,0,0,0], piko.roll(8), smallest), strategy.loadq(target))
         tile = piko.score(roll_state)
         num_tiles = len(opponent)
         ai_state = strategy.transition(ai_state, tile)
@@ -63,10 +72,10 @@ def end_game(state):
 
 def my_roll(smallest):
     dices = 8
-    state = ([0,0,0,0,0,0], piko.roll(8))
+    state = ([0,0,0,0,0,0], piko.roll(8), smallest)
     while True:
         print 'state: %s / total: %d' % (state, piko.total(state))
-        candidates = piko.find_candidates(state, smallest)
+        candidates = piko.find_candidates(state)
         if not candidates:
             return -1
         action = -1
@@ -84,7 +93,7 @@ def my_roll(smallest):
         else:
             # keep some dices then reroll
             state[0][action] += state[1][action]
-            state = (state[0], piko.roll(8-sum(state[0])))
+            state = (state[0], piko.roll(8-sum(state[0])), state[2])
 
 
 if __name__ == "__main__":
