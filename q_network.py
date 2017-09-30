@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 
 
-INPUTS = 12*8+16
+INPUTS = 12*9+16
 OUTPUTS = 12
 
 class NetworkQ:
@@ -22,18 +22,24 @@ class NetworkQ:
         trainer = tf.train.GradientDescentOptimizer(learning_rate=0.1)
         self.updateModel = trainer.minimize(loss)
         init = tf.global_variables_initializer()
-        self.session = tf.Session()
-        self.session.run(init)
+        session = tf.Session()
+        session.run(init)
+        return session
+
     def save(self):
-        print 'save not yet implemented!'
+        #Create a saver object which will save all the variables
+        saver = tf.train.Saver()
+        #Now, save the graph
+        saver.save(self.session, self.fname, global_step=0)
+        print 'saved to', self.fname
 
     @staticmethod
     def _inputs(state):
         res = np.zeros((1,INPUTS))
         for s in range(6):
-            res[0,s*8+state[0][s]] = 1
-            res[0,6*8+s*8+state[1][s]] = 1
-        res[0,12*8+state[2]-21] = 1
+            res[0,s*9+state[0][s]] = 1
+            res[0,6*9+s*9+state[1][s]] = 1
+        res[0,12*9+state[2]-21] = 1
         return res
 #        return np.asmatrix(state[0] + state[1] + [state[2]])
     def get(self, state, action):
