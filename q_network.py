@@ -1,69 +1,48 @@
-import tensorflow as tf
 import numpy as np
 import os
+from keras.models import Sequential, load_model
+from keras.layers import Dense
+from keras.optimizers import Adam
 
 
-INPUTS = 12*9+16
+# 2 sets: dices kept + dices rolled
+# per set: 6 sides * (0-8) count of dices per side
+# (21-36): value of the smallest available tile
+INPUTS = 2*6*9+16
+# 12 possibles actions: keep 1 of 6 sides and reroll or stop
 OUTPUTS = 12
+
+LEARNING_RATE = 0.001
+
 
 class NetworkQ:
     def __init__(self, fname):
-        dirname = 'tf-'+fname
-        if not os.path.exists(dirname):
-            os.mkdir(dirname)
-        self.fname = fname = dirname+'/'+fname
-        if not os.path.isfile(fname+'.meta'):
-            self.session = self._new_session()
+        self.fname = fname + '.h5'
+        if not os.path.isfile(self.fname):
+            self.model = self._new_model()
         else:
-            self.session = self._load_session(fname)
+            self.model = self._load_model(self.fname)
 
-    def _load_session(self, fname):
+    def _load_model(self, fname):
         #Load
-        session = tf.Session()
-        session.run(tf.global_variables_initializer())
-        saver = tf.train.import_meta_graph(fname+'.meta')
-        saver.restore(session, fname)
-        print tf.train.list_variables(fname)
-        #These lines establish the feed-forward part of the network used to choose actions
-        self.inputs = tf.placeholder(shape=[1,INPUTS], dtype=tf.float32)
-#        self.W = tf.Variable(tf.random_uniform([INPUTS,OUTPUTS], 0, 0.01))
-        self.W = tf.train.load_variable(self.fname, 'W')
-        self.Qout = tf.matmul(self.inputs, self.W)
-        #Below we obtain the loss by taking the sum of squares difference between the target and prediction Q values.
-        self.nextQ = tf.placeholder(shape=[1,OUTPUTS], dtype=tf.float32)
-        loss = tf.reduce_sum(tf.square(self.nextQ - self.Qout))
-        trainer = tf.train.GradientDescentOptimizer(learning_rate=0.1)
-        self.updateModel = trainer.minimize(loss)
-        print 'loaded model from', fname
-        session.run(self.W)
-        return session
-
-    def _new_session(self):
-        # TF
-        print 'creating new model'
-        tf.reset_default_graph()
-        #These lines establish the feed-forward part of the network used to choose actions
-        self.inputs = tf.placeholder(shape=[1,INPUTS], dtype=tf.float32)
-        self.W = tf.Variable(tf.random_uniform([INPUTS,OUTPUTS], 0, 0.01), name='W')
-        self.Qout = tf.matmul(self.inputs, self.W)
-#        self.predict = tf.argmax(Qout,1)
-        #Below we obtain the loss by taking the sum of squares difference between the target and prediction Q values.
-        self.nextQ = tf.placeholder(shape=[1,OUTPUTS], dtype=tf.float32)
-        loss = tf.reduce_sum(tf.square(self.nextQ - self.Qout))
-        trainer = tf.train.GradientDescentOptimizer(learning_rate=0.1)
-        self.updateModel = trainer.minimize(loss)
-        init = tf.global_variables_initializer()
-        session = tf.Session()
-        session.run(init)
-        return session
-
+        print 'loading from', self.fname, '...'
+        return load_model(fname)
+    
     def save(self):
-        #Create a saver object which will save all the variables
-        saver = tf.train.Saver()
-        #Now, save the graph
-        saver.save(self.session, self.fname)
-        saver.export_meta_graph(self.fname+'.meta')
+        self.model.save(self.fname)
         print 'saved to', self.fname
+
+    def _new_model(self):
+        # Keras/TF
+        print 'creating new model...'
+        model = Sequential()
+        model.add(Dense(INPUTS, input_dim=INPUTS, activation='relu'))
+        model.add(Dense(INPUTS, activation='relu'))
+        model.add(Dense(INPUTS, activation='relu'))
+        model.add(Dense(INPUTS, activation='relu'))
+        model.add(Dense(OUTPUTS, activation='linear'))
+        model.compile(loss='mse', optimizer=Adam(lr=LEARNING_RATE))
+        return model
 
     @staticmethod
     def _inputs(state):
@@ -75,14 +54,13 @@ class NetworkQ:
         return res
 #        return np.asmatrix(state[0] + state[1] + [state[2]])
     def get(self, state, action):
-        allQ = self.session.run(self.Qout,feed_dict={self.inputs:self._inputs(state)})
+        allQ = self.model.predict( self._inputs(state) )
         return allQ[0,action]
     def set(self, state, action, val):
-        oldQ = self.session.run(self.Qout,feed_dict={self.inputs:self._inputs(state)})
+        oldQ = self.model.predict( self._inputs(state) )
         oldQ[0,action] = val
-        #Train our network using target and predicted Q values
-        _,W1 = self.session.run([self.updateModel, self.W],
-                                feed_dict={self.inputs:self._inputs(state),self.nextQ:oldQ})
+        self.model.fit(self._inputs(state), oldQ, epochs=1, verbose=0)
+
 
         
         

@@ -6,9 +6,8 @@ from q_hash import HashQ
 from q_network import NetworkQ
 
 
-DBNAME = 'q.db'
-EPISODES = 1500
-STEP = 100
+EPISODES = 15000
+STEP = 500
 running = True
 
 def main(argv=sys.argv):
