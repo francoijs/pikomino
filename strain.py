@@ -1,20 +1,44 @@
 #!/usr/bin/python
 
-import time, sys, signal
+import time, sys, signal, argparse
 import piko
 from strategy import episode, setparams
 from q_hash import StrategyHashQ
 
 
-DBNAME = 'strategy.db'
-EPISODES = 100000
-STEP = 1000
+DBNAME = 'strategy'
+DEFAULT_EPISODES = 100000
+DEFAULT_STEP     = 1000
+DEFAULT_ALPHA    = .3
+DEFAULT_EPSILON  = .1
 running = True
 
 def main():
+    # parse args
+    parser = argparse.ArgumentParser(description='Train the strategy.')
+    parser.add_argument('--episodes', '-e', metavar='N', type=int, default=DEFAULT_EPISODES,
+                        help='total number of episodes (default=%d)'%(DEFAULT_EPISODES))
+    parser.add_argument('--step', '-s', metavar='S', type=int, default=DEFAULT_STEP,
+                        help='number of episodes per step (default=%d)'%(DEFAULT_STEP))
+    parser.add_argument('--hash', action='store_true',
+                        help='use hash table instead of NN')
+    parser.add_argument('--alpha', metavar='ALPHA', type=float, default=DEFAULT_ALPHA,
+                        help='learning rate (default=%.3f)'%(DEFAULT_ALPHA))
+    parser.add_argument('--epsilon', metavar='EPSILON', type=float, default=DEFAULT_EPSILON,
+                        help='exploration ratio (default=%.3f)'%(DEFAULT_EPSILON))
+    args = parser.parse_args()
+    print str(args)
+    # params of training
+    EPISODES = args.episodes
+    STEP     = args.step
     # learning mode
-    setparams(0.3, 0.1)
-    q = StrategyHashQ(DBNAME)
+    setparams(args.alpha, args.epsilon)
+    if args.hash:
+        from q_hash import HashQ
+        q = StrategyHashQ(DBNAME)
+    else:
+        from q_network import NetworkQ
+        q = StrategyNetworkQ(DBNAME)
     # counters
     won = all = rate = gain = mark = tot_mark = 0
     time0 = time.time()
