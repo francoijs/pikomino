@@ -47,7 +47,8 @@ def episode(q):
         else:
             if action==0 or len(state[1])==0:
                 target_q = loadq(0)   # regular roll
-                smallest = min([tiles[0]] + [opp[-1] for opp in [state[1]] if opp])
+                smallest = tiles[0]
+#                smallest = min([tiles[0]] + [opp[-1] for opp in [state[1]] if opp])
             else:
                 target_q = loadq(state[1][-1])   # aim at opponent tile
                 smallest = 21

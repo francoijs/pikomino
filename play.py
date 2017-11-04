@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys
+import sys, argparse
 import strategy, piko
 from q_hash import StrategyHashQ
 
@@ -8,10 +8,21 @@ from q_hash import StrategyHashQ
 DBNAME = 'strategy'
 
 def main(argv=sys.argv):
+    # parse args
+    parser = argparse.ArgumentParser(description='Play a game.')
+    parser.add_argument('--hash', action='store_true',
+                        help='use hash table instead of NN')
+    args = parser.parse_args()
+    print str(args)
     # playing mode
     strategy.s_setparams(0, 0, log=True)
     piko.setparams(0, 0, log=True)
-    q = StrategyHashQ(DBNAME)
+    if args.hash:
+        from q_hash import StrategyHashQ
+        q = StrategyHashQ(DBNAME)
+    else:
+        from q_network import StrategyNetworkQ
+        q = StrategyNetworkQ(DBNAME)
     # game elements
     mine = []
     opponent = []
@@ -22,13 +33,12 @@ def main(argv=sys.argv):
     while True:
         # my turn
         print 'your turn:', my_state
-        smallest = [tiles[0]]
+        smallest = tiles[0]
         if opponent:
             opp = opponent[-1]
-            smallest = smallest + [opp]
         else:
             opp = 0
-        tile = my_roll(min(smallest))
+        tile = my_roll(smallest, opp)
         my_state = strategy.transition(my_state, tile)
         ai_state = (tiles, mine, strategy.score(mine), opponent, strategy.score(opponent))
         if opp and tile==opp:
@@ -72,12 +82,12 @@ def end_game(state):
     else:
         print 'draw %d/%d' % (state[4], state[2])
 
-def my_roll(smallest):
+def my_roll(smallest, opp):
     dices = 8
     state = ([0,0,0,0,0,0], piko.roll(8), smallest)
     while True:
         print 'state: %s / total: %d' % (state, piko.total(state))
-        candidates = piko.find_candidates(state)
+        candidates = piko.find_candidates(state, opp)
         if not candidates:
             return -1
         action = -1

@@ -59,7 +59,7 @@ def policy(state, q):
     # return best action
     return candidates[ max(range(len(candidates)), key=lambda i: q.get(state,candidates[i])) ]
 
-def find_candidates(state):
+def find_candidates(state, opp=0):
     """ Return list of candidates actions """
     # dices that may be kept before rerolling
     candidates = [n for n in range(6) if state[1][n]>0 and state[0][n]==0]
@@ -75,7 +75,7 @@ def find_candidates(state):
             # FIXME: if the opponent tile is smaller that the smallest from stash,
             # it may be not allowed to stop -> fix this case
             new_score = total(state) + state[1][action]*action
-            if state[0][0] and new_score >= state[2]:
+            if state[0][0] and (new_score>=state[2] or new_score==opp):
                 stop.append(6+action)
     return candidates + stop
 
