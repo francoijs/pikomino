@@ -3,7 +3,6 @@
 import time, sys, signal, argparse
 import piko
 from strategy import episode, s_setparams
-from q_hash import StrategyHashQ
 
 
 DBNAME = 'strategy'
@@ -34,13 +33,13 @@ def main():
     # learning mode
     s_setparams(args.alpha, args.epsilon)
     if args.hash:
-        from q_hash import HashQ
+        from q_hash import StrategyHashQ
         q = StrategyHashQ(DBNAME)
     else:
-        from q_network import NetworkQ
+        from q_network import StrategyNetworkQ
         q = StrategyNetworkQ(DBNAME)
     # counters
-    won = all = rate = gain = mark = tot_mark = 0
+    won = all = rate = gain = mark = tot_mark = null = 0
     time0 = time.time()
     while running:
         state,reward,score,mark = episode(q)
@@ -49,15 +48,16 @@ def main():
             gain += score
         all += 1
         tot_mark += mark
+        if score==0:
+            null += 1
         if not all % STEP:
             perf = (time.time() - time0) * float(1000) / STEP
             rate = 100 * float(won)/STEP
+            null_rate = 100 * float(null)/STEP
             avg_mark = 100 * tot_mark/STEP
-            print 'games: %d / won: %.1f%% of last %d / avg score: %.1f / avg mark: %.1f%% / time: %.3fms/game' % (
-                all, rate, STEP, float(gain)/won if won else 0, avg_mark, perf)
-            won = 0
-            gain = 0
-            tot_mark = 0
+            print 'games: %d / won: %.1f%% of last %d / null: %.1f%% / avg score: %.1f / avg mark: %.1f%% / time: %.3fms/game' % (
+                all, rate, STEP, null_rate, float(gain)/won if won else 0, avg_mark, perf)
+            won = gain = tot_mark = null = 0
             time0 = time.time()
         if all == EPISODES:
             break    

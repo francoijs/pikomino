@@ -62,7 +62,31 @@ class NetworkQ:
         self.model.fit(self._inputs(state), oldQ, epochs=1, verbose=0)
 
 
-        
-        
-        
-        
+# 16 possible smallest tiles
+# 16 possible top opponent tiles
+# score delta [-40,40]
+S_INPUTS = 16+16+80
+# 2 actions
+S_OUTPUTS = 2
+
+class StrategyNetworkQ(NetworkQ):
+    
+    def _new_model(self):
+        # Keras/TF
+        print 'creating new strategy model %s' % (self.fname)
+        model = Sequential()
+        model.add(Dense(S_INPUTS, input_dim=S_INPUTS, activation='relu'))
+        model.add(Dense(S_INPUTS, activation='relu'))
+        model.add(Dense(S_OUTPUTS, activation='linear'))
+        model.compile(loss='mse', optimizer=Adam(lr=LEARNING_RATE))
+        return model
+
+    @staticmethod
+    def _inputs(state):
+        res = np.zeros((1,S_INPUTS))
+        st = 21 if not state[0] else min(state[0])
+        ot = 21 if not state[1] else state[1][-1]
+        res[0,st-21] = 1                    # smallest available tile
+        res[0,16+ot-21] = 1                 # opponent top tile
+        res[0,32+state[4]-state[2]+40] = 1  # score delta
+        return res
