@@ -10,7 +10,7 @@ def setparams(alpha, epsilon, log=False, target=0):
     global ALPHA, EPSILON, LOG, TARGET
     ALPHA = alpha
     EPSILON = epsilon
-    print 'alpha=%.1f / epsilon=%.1f' % (ALPHA, EPSILON)
+    print 'roll: alpha=%.1f / epsilon=%.1f' % (ALPHA, EPSILON)
     LOG = log
     TARGET = target
 
@@ -72,6 +72,8 @@ def find_candidates(state):
                 stop.append(6)
         else:
             # cannot stop if score not at least bigger than the smallest available tile
+            # FIXME: if the opponent tile is smaller that the smallest from stash,
+            # it may be not allowed to stop -> fix this case
             new_score = total(state) + state[1][action]*action
             if state[0][0] and new_score >= state[2]:
                 stop.append(6+action)

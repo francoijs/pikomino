@@ -34,7 +34,7 @@ class NetworkQ:
 
     def _new_model(self):
         # Keras/TF
-        print 'creating new model...'
+        print 'creating new model %s' % (self.fname)
         model = Sequential()
         model.add(Dense(INPUTS, input_dim=INPUTS, activation='relu'))
         model.add(Dense(INPUTS, activation='relu'))

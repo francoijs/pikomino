@@ -1,22 +1,25 @@
 import piko, copy, random, bisect
 from q_hash import HashQ
+from q_network import NetworkQ
 
 
-LOG = False
-ALPHA = 0.3    # learning rate
-EPSILON = 0.1
+S_LOG = False
+S_ALPHA = 0.3    # learning rate
+S_EPSILON = 0.1
 
 class sortedlist(list):
     '''just a list but with an insort (insert into sorted position)'''
     def insort(self, x):
         bisect.insort(self, x)
 
-def setparams(alpha, epsilon, log=False):
-    global ALPHA, EPSILON, LOG
-    ALPHA = alpha
-    EPSILON = epsilon
-    print 'alpha=%.1f / epsilon=%.1f' % (ALPHA, EPSILON)
-    LOG = log
+def s_setparams(alpha, epsilon, log=False):
+    global S_ALPHA, S_EPSILON, S_LOG
+    S_ALPHA = alpha
+    S_EPSILON = epsilon
+    print 'strategy: alpha=%.1f / epsilon=%.1f' % (S_ALPHA, S_EPSILON)
+    # deactivate learning when rolling dices
+    piko.setparams(0,0)
+    S_LOG = log
 
 def episode(q):
     """ Run an episode and return final state, reward, my score """
@@ -55,7 +58,7 @@ def episode(q):
                 all_mark += 1
                 if roll_reward > 0:
                     mark += 1   # sniping succeeded
-            if LOG:
+            if S_LOG:
                 print 'my roll:' if my_turn else 'opponent roll:', score
             state = transition(state, score)
             reward = 0
@@ -65,9 +68,9 @@ def episode(q):
         traces.append( (state0, action, reward+qsa) )
         # update q(state0,action)
         old = q.get(state0, action)
-        new = old + ALPHA * ( reward + qsa - old )
+        new = old + S_ALPHA * ( reward + qsa - old )
         q.set(state0, action, new)
-        if LOG:
+        if S_LOG:
             print state0, '--|%d|->' % (action), state
         if reward != 0:
             break
@@ -77,7 +80,7 @@ def episode(q):
     while traces:
         trace = traces.pop()
         old = q.get(trace[0], trace[1])
-        new = old + ALPHA * ( trace[2] - old )
+        new = old + S_ALPHA * ( trace[2] - old )
         q.set(trace[0], trace[1], new)        
     return state, reward, state[4], mark_rate
 
@@ -137,14 +140,19 @@ def policy(state, q):
     # tile of opponent
     if state[1]:
         candidates = candidates + [1]
-    if random.random() < EPSILON:
+    if random.random() < S_EPSILON:
         # exploration
         return random.choice(candidates)
     # return best action
     return candidates[ max(range(len(candidates)), key=lambda i: q.get(state,candidates[i])) ]
 
-allq = {}
+# tables of Q-values
+allq = {
+    # use a network for target=0
+    0: NetworkQ('q00')
+}
 def loadq(action):
     if action not in allq:
-        allq[action] = HashQ('q%02d.db' % (action))
+        # use hash tables for all other targets
+        allq[action] = HashQ('q%02d' % (action))
     return allq[action]

@@ -8,10 +8,10 @@ from q_hash import *
 def main(argv=sys.argv):
     # target param
     if len(argv) < 2:
-        DBNAME = 'strategy.db'
+        DBNAME = 'strategy'
         q = StrategyHashQ(DBNAME)
     else:
-        DBNAME = 'q%02d.db' % (int(argv[1]))
+        DBNAME = 'q%02d' % (int(argv[1]))
         q = HashQ(DBNAME)
     print '%s: %d items' % (DBNAME, len(q))
     print 'min: %.02f / max: %.02f / avg: %.02f / zeros: %.1f%%' % (

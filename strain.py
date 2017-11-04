@@ -2,7 +2,7 @@
 
 import time, sys, signal, argparse
 import piko
-from strategy import episode, setparams
+from strategy import episode, s_setparams
 from q_hash import StrategyHashQ
 
 
@@ -32,7 +32,7 @@ def main():
     EPISODES = args.episodes
     STEP     = args.step
     # learning mode
-    setparams(args.alpha, args.epsilon)
+    s_setparams(args.alpha, args.epsilon)
     if args.hash:
         from q_hash import HashQ
         q = StrategyHashQ(DBNAME)

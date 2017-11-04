@@ -5,12 +5,12 @@ import strategy, piko
 from q_hash import StrategyHashQ
 
 
-DBNAME = 'strategy.db'
+DBNAME = 'strategy'
 
 def main(argv=sys.argv):
     # playing mode
-    strategy.setparams(0, 0, log=True)
-    piko.setparams(0, 0)
+    strategy.s_setparams(0, 0, log=True)
+    piko.setparams(0, 0, log=True)
     q = StrategyHashQ(DBNAME)
     # game elements
     mine = []
