@@ -4,9 +4,9 @@ import cPickle as pickle
 
 class HashQ:
     def __init__(self, fname):
-        self.fname = fname
+        self.fname = fname = fname + '.db'
         if not os.path.isfile(fname):
-            print 'creating empty db'
+            print 'creating empty %s' % (fname)
             self.q = {}
         else:
             with open(fname, 'rb') as file:

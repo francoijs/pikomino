@@ -31,7 +31,7 @@ def main(argv=sys.argv):
     EPISODES = args.episodes
     STEP     = args.step
     target   = args.target
-    DBNAME = 'q%02d.db' % (target)
+    DBNAME = 'q%02d' % (target)
     # learning mode
     setparams(args.alpha, args.epsilon, target=target)
     if args.hash:
@@ -44,7 +44,7 @@ def main(argv=sys.argv):
     won = all = rate = gain = 0
     time0 = time.time()
     while running:
-        if target == 0:
+        if target==0:
             smallest = random.randint(21,36)
         else:
             smallest = 21
