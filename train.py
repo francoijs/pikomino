@@ -6,11 +6,14 @@ from piko import episode, roll, setparams
 
 DEFAULT_EPISODES = 15000
 DEFAULT_STEP     = 500
-DEFAULT_ALPHA    = .8
+DEFAULT_ALPHA    = .5
 DEFAULT_EPSILON  = .1
+VALIDATION_RATIO = .2
+DEFAULT_LAYERS   = 3
 running = True
 
 def main(argv=sys.argv):
+    
     # parse args
     parser = argparse.ArgumentParser(description='Train to roll the dices.')
     parser.add_argument('target', metavar='T', type=int, default=0, nargs='?',
@@ -25,8 +28,13 @@ def main(argv=sys.argv):
                         help='learning rate (default=%.3f)'%(DEFAULT_ALPHA))
     parser.add_argument('--epsilon', metavar='EPSILON', type=float, default=DEFAULT_EPSILON,
                         help='exploration ratio (default=%.3f)'%(DEFAULT_EPSILON))
+    parser.add_argument('--layers', '-l', metavar='L', type=int, default=DEFAULT_LAYERS,
+                        help='number of hidden layers (default=%d)'%(DEFAULT_LAYERS))
+    parser.add_argument('--decay', metavar='K', type=int, default=0,
+                        help='learning rate decay (default=off)')
     args = parser.parse_args()
     print str(args)
+    
     # params of training
     EPISODES = args.episodes
     STEP     = args.step
@@ -39,29 +47,42 @@ def main(argv=sys.argv):
         q = HashQ(DBNAME)
     else:
         from q_network import NetworkQ
-        q = NetworkQ(DBNAME)
+        q = NetworkQ(DBNAME, args.layers)
+    
     # counters
     won = all = rate = gain = 0
     time0 = time.time()
     while running:
         if target==0:
-            smallest = random.randint(21,36)
+            smallest = 21
         else:
             smallest = 21
-        state,reward = episode(([0,0,0,0,0,0], roll(8), smallest), q)
-        if (target==0 and reward>0) or (reward==100):
-            won += 1
-            gain += reward
+        episode(([0,0,0,0,0,0], roll(8), smallest), q)
         all += 1
         if not all % STEP:
+            if target==0:
+                # validation
+                setparams(0, 0, target=target)
+                rewards = []
+                won = gain = 0
+                for _ in range(int(VALIDATION_RATIO*STEP)):
+                    _,reward = episode(([0,0,0,0,0,0], roll(8), 21), q)
+                    if (target==0 and reward>0) or (reward==100):
+                        won += 1
+                        gain += reward
+                    rewards.append(reward)
+                rate = 100 * float(won) / (VALIDATION_RATIO*STEP)
+                # continue learning (with decay if required)
+                if args.decay:
+                    alpha = args.alpha * args.decay / (args.decay+all)
+                setparams(alpha, args.epsilon, target=target)
             perf = (time.time() - time0) * float(1000) / STEP
-            rate = 100 * float(won)/STEP
-            print 'episodes: %d / won: %.1f%% of last %d / avg gain: %.1f / time: %.3fms/episode' % (all, rate, STEP, float(gain)/won if won else 0, perf)
-            won = 0
-            gain = 0
+            print 'train: episodes: %d / time: %.3fms/ep | test: won: %.1f%% of %d / avg gain: %.1f' % (all, perf, rate, VALIDATION_RATIO*STEP, float(gain)/won if won else 0)
             time0 = time.time()
         if all == EPISODES:
-            break    
+            break
+
+    # save model before exit
     q.save()
 
 def stop(signum, frame):

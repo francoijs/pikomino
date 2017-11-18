@@ -10,7 +10,7 @@ def setparams(alpha, epsilon, log=False, target=0):
     global ALPHA, EPSILON, LOG, TARGET
     ALPHA = alpha
     EPSILON = epsilon
-    print 'roll: alpha=%.1f / epsilon=%.1f' % (ALPHA, EPSILON)
+    print 'roll: alpha=%.3f / epsilon=%.3f' % (ALPHA, EPSILON)
     LOG = log
     TARGET = target
 
@@ -22,10 +22,6 @@ def episode(state, q):
         state0 = copy.deepcopy(state)
         action = policy(state, q)
         state, reward, qsa = transition(state, action, q)
-        # record trace
-        # FIXME: disabled, not apparent effect on perfs
-#        traces.append( (state0, action) )
-        # update q(state0,action)
         old = q.get(state0, action)
         new = old + ALPHA * ( reward + qsa - old )
         q.set(state0, action, new)
@@ -33,15 +29,7 @@ def episode(state, q):
             print state0, '--|%d|->' % (action), state
         if reward != 0:
             break
-    reward1 = reward
-    # update back traces
-    while traces:
-        trace = traces.pop()
-        old = q.get(trace[0], trace[1])
-        _,reward,qsa = transition(trace[0], trace[1], q)
-        new = old + ALPHA * ( reward + qsa - old )
-        q.set(trace[0], trace[1], new)
-    return state,reward1
+    return state,reward
 
 def policy(state, q):
     """

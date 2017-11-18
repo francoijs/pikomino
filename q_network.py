@@ -16,10 +16,10 @@ LEARNING_RATE = 0.001
 
 
 class NetworkQ:
-    def __init__(self, fname):
-        self.fname = fname + '.h5'
+    def __init__(self, fname, layers=3):
+        self.fname = '%s-%dhidden.h5' % (fname, layers)
         if not os.path.isfile(self.fname):
-            self.model = self._new_model()
+            self.model = self._new_model(layers)
         else:
             self.model = self._load_model(self.fname)
 
@@ -32,14 +32,14 @@ class NetworkQ:
         self.model.save(self.fname)
         print 'saved to', self.fname
 
-    def _new_model(self):
+    def _new_model(self, layers):
         # Keras/TF
         print 'creating new model %s' % (self.fname)
         model = Sequential()
         model.add(Dense(INPUTS, input_dim=INPUTS, activation='relu'))
-        model.add(Dense(INPUTS, activation='relu'))
-        model.add(Dense(INPUTS, activation='relu'))
-        model.add(Dense(INPUTS, activation='relu'))
+        while layers>0:
+            model.add(Dense(INPUTS, activation='relu'))
+            layers -= 1
         model.add(Dense(OUTPUTS, activation='linear'))
         model.compile(loss='mse', optimizer=Adam(lr=LEARNING_RATE))
         return model
@@ -76,6 +76,8 @@ class StrategyNetworkQ(NetworkQ):
         print 'creating new strategy model %s' % (self.fname)
         model = Sequential()
         model.add(Dense(S_INPUTS, input_dim=S_INPUTS, activation='relu'))
+        model.add(Dense(S_INPUTS, activation='relu'))
+        model.add(Dense(S_INPUTS, activation='relu'))
         model.add(Dense(S_INPUTS, activation='relu'))
         model.add(Dense(S_OUTPUTS, activation='linear'))
         model.compile(loss='mse', optimizer=Adam(lr=LEARNING_RATE))
