@@ -1,6 +1,5 @@
 import piko, copy, random, bisect
 from q_hash import HashQ
-from q_network import NetworkQ
 
 
 S_LOG = False
@@ -148,12 +147,15 @@ def policy(state, q):
     return candidates[ max(range(len(candidates)), key=lambda i: q.get(state,candidates[i])) ]
 
 # tables of Q-values
-allq = {
-    # use a network for target=0
-    0: NetworkQ('q00')
-}
+allq = {}
+
 def loadq(action):
     if action not in allq:
-        # use hash tables for all other targets
-        allq[action] = HashQ('q%02d' % (action))
+        if action == 0:
+            from q_network import NetworkQ
+            # use a network for target=0
+            allq[0] = NetworkQ('q00')
+        else:
+            # use hash tables for all other targets
+            allq[action] = HashQ('q%02d' % (action))
     return allq[action]

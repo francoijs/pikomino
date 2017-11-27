@@ -49,6 +49,7 @@ def policy(state, q):
 
 def find_candidates(state, opp=0):
     """ Return list of candidates actions """
+    assert sum(state[0]) + sum(state[1]) == 8
     # dices that may be kept before rerolling
     candidates = [n for n in range(6) if state[1][n]>0 and state[0][n]==0]
     # dices that may be kept before stopping
