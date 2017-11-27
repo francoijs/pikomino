@@ -70,8 +70,11 @@ S_INPUTS = 16+16+80
 S_OUTPUTS = 2
 
 class StrategyNetworkQ(NetworkQ):
+
+    def __init__(self, fname):
+        NetworkQ.__init__(self, fname, 5)
     
-    def _new_model(self):
+    def _new_model(self,layers):
         # Keras/TF
         print 'creating new strategy model %s' % (self.fname)
         model = Sequential()
