@@ -10,9 +10,10 @@ DBNAME = 'strategy'
 def main():
     # playing mode
     s_setparams(0, 0, log=True)
-    q = StrategyHashQ(DBNAME)
-    state,reward,score,mark = episode(q)
-    print 'end:',state,reward,score,mark
+    from q_network import StrategyNetworkQ
+    q = StrategyNetworkQ(DBNAME)
+    reward,score = episode(q)
+    print 'end:',reward,score
 
 
 if __name__ == "__main__":

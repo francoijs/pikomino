@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import time, sys, signal, argparse
-import piko
 from strategy import episode, s_setparams
 
 
@@ -25,13 +24,15 @@ def main():
                         help='learning rate (default=%.3f)'%(DEFAULT_ALPHA))
     parser.add_argument('--epsilon', metavar='EPSILON', type=float, default=DEFAULT_EPSILON,
                         help='exploration ratio (default=%.3f)'%(DEFAULT_EPSILON))
+    parser.add_argument('--debug', '-d', action='store_true', default=False, 
+                        help='display debug log')
     args = parser.parse_args()
     print str(args)
     # params of training
     EPISODES = args.episodes
     STEP     = args.step
     # learning mode
-    s_setparams(args.alpha, args.epsilon)
+    s_setparams(args.alpha, args.epsilon, log=args.debug)
     if args.hash:
         from q_hash import StrategyHashQ
         q = StrategyHashQ(DBNAME)
@@ -42,7 +43,7 @@ def main():
     won = all = rate = gain = mark = tot_mark = null = 0
     time0 = time.time()
     while running:
-        state,reward,score,mark = episode(q)
+        reward,score = episode(q)
         if reward>0:
             won += 1
             gain += score
