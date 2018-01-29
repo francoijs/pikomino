@@ -75,4 +75,4 @@ def policy(state, q):
     else:
         # return best action
         action = candidates[ max(range(len(candidates)), key=lambda i: q.get(state.inputs(),candidates[i])) ]
-    return action, candidates
+    return action

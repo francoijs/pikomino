@@ -2,7 +2,7 @@ import random, bisect, copy
 import numpy as np
 
 
-def roll(n):
+def _roll(n):
     """ Roll n dices and return 6-array with count for each value """
     roll = [0,0,0,0,0,0]
     draw = [random.randint(0,5) for _ in range(n)]
@@ -30,7 +30,9 @@ class State(object):
     
     def __init__(self, stash=range(21,37),
                  opponent=[], player=[],
-                 dices=[0,0,0,0,0,0], roll=roll(8)):
+                 dices=[0,0,0,0,0,0], roll=None):
+        if not roll:
+            roll = _roll(8)
         self.stash    = sortedlist(stash)
         self.opponent = opponent
         self.player   = player
@@ -54,7 +56,7 @@ class State(object):
         return self.end_turn()
 
     def end_turn(self):
-        self.roll = roll(8)
+        self.roll = _roll(8)
         self.dices = [0,0,0,0,0,0]
         return self
 
@@ -63,6 +65,11 @@ class State(object):
             
     def total(self):
         return 5*self.dices[0] + sum([n*self.dices[n] for n in range(6)])
+
+    def change_turn(self):
+        return State(stash=self.stash,
+                     opponent=self.player,
+                     player=self.opponent)
 
     def player_wins(self):
         return score(self.player) > score(self.opponent)
@@ -83,7 +90,7 @@ class State(object):
         if action<6:
             # keep some dices then reroll
             self.dices[action] += self.roll[action]
-            self.roll = roll(8-sum(self.dices))
+            self.roll = _roll(8-sum(self.dices))
             return self
         else:
             self.transition(action-6)
