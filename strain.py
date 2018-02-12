@@ -9,6 +9,7 @@ DEFAULT_EPISODES = 100000
 DEFAULT_STEP     = 1000
 DEFAULT_ALPHA    = .3
 DEFAULT_EPSILON  = .1
+DEFAULT_LAYERS   = 3
 running = True
 
 def main():
@@ -24,6 +25,8 @@ def main():
                         help='learning rate (default=%.3f)'%(DEFAULT_ALPHA))
     parser.add_argument('--epsilon', metavar='EPSILON', type=float, default=DEFAULT_EPSILON,
                         help='exploration ratio (default=%.3f)'%(DEFAULT_EPSILON))
+    parser.add_argument('--layers', '-l', metavar='L', type=int, default=DEFAULT_LAYERS,
+                        help='number of hidden layers (default=%d)'%(DEFAULT_LAYERS))
     parser.add_argument('--debug', '-d', action='store_true', default=False, 
                         help='display debug log')
     args = parser.parse_args()
@@ -38,7 +41,7 @@ def main():
         q = StrategyHashQ(DBNAME)
     else:
         from q_network import StrategyNetworkQ
-        q = StrategyNetworkQ(DBNAME)
+        q = StrategyNetworkQ(DBNAME, layers=args.layers)
     # counters
     won = all = rate = gain = mark = tot_mark = null = 0
     time0 = time.time()

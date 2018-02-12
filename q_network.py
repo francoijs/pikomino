@@ -3,17 +3,18 @@ import os
 from keras.models import Sequential, load_model
 from keras.layers import Dense
 from keras.optimizers import Adam
+from state import State
 
 
 LEARNING_RATE = 0.001
-INPUTS = 16+16+16+81+2*6*9   # 261
+INPUTS = State.INPUTS
 # 12 possibles actions: keep 1 of 6 sides and reroll or stop
 OUTPUTS = 12
 
 class StrategyNetworkQ():
 
     def __init__(self, fname, layers=3):
-        self.fname = '%s-%dhidden.h5' % (fname, layers)
+        self.fname = '%s-%dinputs-%dhidden.h5' % (fname, INPUTS, layers)
         if not os.path.isfile(self.fname):
             self.model = self._new_model(layers)
         else:
@@ -40,9 +41,10 @@ class StrategyNetworkQ():
         self.model.save(self.fname)
         print 'saved to', self.fname
 
+    def get_all(self, state):
+        return self.model.predict(state)
     def get(self, state, action):
-        allQ = self.model.predict(state)
-        return allQ[0,action]
+        return self.get_all(state)[0,action]
     def set(self, state, action, val):
         oldQ = self.model.predict(state)
         oldQ[0,action] = val

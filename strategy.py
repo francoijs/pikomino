@@ -30,7 +30,7 @@ def episode(q):
         # end of game?
         if not state.stash:
             # no more tiles in stash
-            if (my_turn and state.player_wins()) or (not my_turn and not state.opponent_wins()):
+            if (my_turn and state.player_wins()):
                 qsa = reward = 1    # win
             else:
                 qsa = reward = -1   # loss or draw
@@ -48,13 +48,12 @@ def episode(q):
         # log transition
         if LOG:
             print 'transition:', state0, '--|%d|->' % (action), state
-        if reward != 0:
+        if reward:
             # game is over
             break
         # change player?
         if state.end_of_turn():
-            state = State(stash=state.stash,
-                          opponent=state.player, player=state.opponent)
+            state = state.change_turn()
             my_turn = not my_turn
     return reward, (state.player_score() if my_turn else state.opponent_score())
 
@@ -74,5 +73,6 @@ def policy(state, q):
         action = random.choice(candidates)
     else:
         # return best action
-        action = candidates[ max(range(len(candidates)), key=lambda i: q.get(state.inputs(),candidates[i])) ]
-    return action
+        allQ = q.get_all(state.inputs())
+        action = candidates[ max(range(len(candidates)), key=lambda i: allQ[0,candidates[i]]) ]
+    return action, candidates

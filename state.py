@@ -25,7 +25,6 @@ class sortedlist(list):
     def insort(self, x):
         bisect.insort(self, x)
 
-
 class State(object):
     
     def __init__(self, stash=range(21,37),
@@ -135,13 +134,13 @@ class State(object):
         return candidates + stop
 
     
-    # 16 possible tiles in stash
-    # 16 possible top opponent tiles [21,36]
-    # 16 possible top mine tiles [21,36]
-    # 81 possible score deltas [-40,40]
+    # ohv: 16 possible tiles in stash
+    # ohv: 16 possible top opponent tiles [21,36]
+    # ovh: 16 possible top mine tiles [21,36]
+    # int: possible score delta [-40,40]
     # 2 sets: dices kept + dices rolled
-    # per set: 6 sides * (0-8) count of dices per side
-    INPUTS = 16+16+16+81+2*6*9   # 261
+    # per set: 6 sides * [0-8] count of dices per side
+    INPUTS = 16+16+16+1+2*6*9   # 103
     # 12 possibles actions: keep 1 of 6 sides and reroll or stop
     OUTPUTS = 12
 
@@ -154,15 +153,15 @@ class State(object):
         ptr += 16
         # opponent top tile
         if self.opponent:
-            res[0,ptr+self.opponent[-1]] = 1
+            res[0,ptr+self.opponent[-1]-21] = 1
         ptr += 16
         # my top tile
         if self.player:
-            res[0,ptr+self.player[-1]] = 1
+            res[0,ptr+self.player[-1]-21] = 1
         ptr += 16
         # score delta
-        res[0,ptr+self.player_score()-self.opponent_score()+40] = 1
-        ptr += 81
+        res[0,ptr] = float(self.player_score()-self.opponent_score()) / 40
+        ptr += 1
         # dices
         for s in range(6):
             res[0,ptr+s*9+self.dices[s]] = 1
@@ -170,4 +169,6 @@ class State(object):
         # roll
         for s in range(6):
             res[0,ptr+s*9+self.roll[s]] = 1
+        ptr += 6*9
+        assert ptr == self.INPUTS
         return res
