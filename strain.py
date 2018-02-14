@@ -43,25 +43,31 @@ def main():
         from q_network import StrategyNetworkQ
         q = StrategyNetworkQ(DBNAME, layers=args.layers)
     # counters
-    won = all = rate = gain = mark = tot_mark = null = 0
+    won = all = rate = tot_score = mark = tot_mark = tot_null = tot_rounds = 0
     time0 = time.time()
     while running:
-        reward,score = episode(q)
+        reward,score,mark,rounds = episode(q)
         if reward>0:
             won += 1
-            gain += score
+            tot_score += score
         all += 1
         tot_mark += mark
+        tot_rounds += rounds
         if score==0:
-            null += 1
+            tot_null += 1
+        mark = score = 0
         if not all % STEP:
             perf = (time.time() - time0) * float(1000) / STEP
             rate = 100 * float(won)/STEP
-            null_rate = 100 * float(null)/STEP
-            avg_mark = 100 * tot_mark/STEP
-            print 'games: %d / won: %.1f%% of last %d / null: %.1f%% / avg score: %.1f / avg mark: %.1f%% / time: %.3fms/game' % (
-                all, rate, STEP, null_rate, float(gain)/won if won else 0, avg_mark, perf)
-            won = gain = tot_mark = null = 0
+            null_rate = 100 * float(tot_null)/STEP
+            avg_mark = float(tot_mark)/STEP
+            if won:
+                avg_score = float(tot_score)/won
+            else:
+                avg_score = 0
+            print 'games: %d / won: %.1f%% of last %d / rounds: %.1f/game / null: %.1f%% / avg score: %.1f / avg mark: %.1f%% / time: %.3fms/game' % (
+                all, rate, STEP, float(tot_rounds)/STEP, null_rate, avg_score, avg_mark, perf)
+            won = tot_null = tot_score = tot_mark = tot_rounds = 0
             time0 = time.time()
         if all == EPISODES:
             break    

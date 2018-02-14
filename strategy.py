@@ -21,6 +21,8 @@ def episode(q):
     # initial state
     state = State()
     my_turn = True
+    # number of steal
+    rounds = steal = opp_top_tile = 0
     while True:
         state0 = copy.deepcopy(state)
         action,candidates = policy(state, q)
@@ -38,7 +40,8 @@ def episode(q):
             # game not over
             reward = 0
             if candidates:
-                qsa = max([q.get(state.inputs(),a) for a in candidates])
+                allq = q.get_all(state.inputs())
+                qsa = max([allq[0,a] for a in candidates])
             else:
                 qsa = 0
         # update q(state0,action)
@@ -53,9 +56,16 @@ def episode(q):
             break
         # change player?
         if state.end_of_turn():
+            rounds += 1
+            if state.player and state.player[-1]==opp_top_tile:
+                steal +=1
+            if state.player:
+                opp_top_tile = state.player[-1]
+            else:
+                opp_top_tile = 0
             state = state.change_turn()
             my_turn = not my_turn
-    return reward, (state.player_score() if my_turn else state.opponent_score())
+    return reward, (state.player_score() if my_turn else state.opponent_score()), steal, rounds
 
 def policy(state, q):
     """
