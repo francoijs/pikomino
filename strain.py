@@ -68,6 +68,7 @@ def main():
             print 'games: %d / won: %.1f%% of last %d / rounds: %.1f/game / null: %.1f%% / avg score: %.1f / avg mark: %.1f%% / time: %.3fms/game' % (
                 all, rate, STEP, float(tot_rounds)/STEP, null_rate, avg_score, avg_mark, perf)
             won = tot_null = tot_score = tot_mark = tot_rounds = 0
+            q.save(epoch=all)
             time0 = time.time()
         if all == EPISODES:
             break    

@@ -37,9 +37,13 @@ class StrategyNetworkQ():
         print 'loading from', self.fname, '...'
         return load_model(fname)
     
-    def save(self):
-        self.model.save(self.fname)
-        print 'saved to', self.fname
+    def save(self, epoch=0):
+        if epoch:
+            epoch = '-'+str(epoch)
+        else:
+            epoch = ''
+        self.model.save(self.fname+epoch)
+        print 'saved to', self.fname+epoch
 
     def get_all(self, state):
         return self.model.predict(state)

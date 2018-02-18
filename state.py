@@ -28,10 +28,14 @@ class sortedlist(list):
 class State(object):
     
     def __init__(self, stash=range(21,37),
-                 opponent=[], player=[],
+                 opponent=None, player=None,
                  dices=[0,0,0,0,0,0], roll=None):
         if not roll:
             roll = _roll(8)
+        if not player:
+            player = []
+        if not opponent:
+            opponent = []    
         self.stash    = sortedlist(stash)
         self.opponent = opponent
         self.player   = player
@@ -140,7 +144,7 @@ class State(object):
     # int: possible score delta [-40,40]
     # 2 sets: dices kept + dices rolled
     # per set: 6 sides * [0-8] count of dices per side
-    INPUTS = 16+16+16+1+2*6*9   # 103
+    INPUTS = 16+16+16+81+2*6*9   # 103
     # 12 possibles actions: keep 1 of 6 sides and reroll or stop
     OUTPUTS = 12
 
@@ -160,8 +164,8 @@ class State(object):
             res[0,ptr+self.player[-1]-21] = 1
         ptr += 16
         # score delta
-        res[0,ptr] = float(self.player_score()-self.opponent_score()) / 40
-        ptr += 1
+        res[0,ptr+40+self.player_score()-self.opponent_score()] = 1
+        ptr += 81
         # dices
         for s in range(6):
             res[0,ptr+s*9+self.dices[s]] = 1
