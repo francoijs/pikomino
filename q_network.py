@@ -1,5 +1,6 @@
-import numpy as np
-import os
+# pylint: disable=multiple-imports,import-error
+
+import os, logging
 from keras.models import Sequential, load_model
 from keras.layers import Dense
 from keras.optimizers import Adam
@@ -10,6 +11,8 @@ LEARNING_RATE = 0.001
 INPUTS = State.INPUTS
 # 12 possibles actions: keep 1 of 6 sides and reroll or stop
 OUTPUTS = 12
+log = logging.getLogger('StrategyNetworkQ')
+
 
 class StrategyNetworkQ():
 
@@ -22,7 +25,7 @@ class StrategyNetworkQ():
 
     def _new_model(self, layers):
         # Keras/TF
-        print 'creating new model %s' % (self.fname)
+        log.info('creating new model %s', self.fname)
         model = Sequential()
         model.add(Dense(INPUTS, input_dim=INPUTS, activation='relu'))
         while layers>0:
@@ -34,7 +37,7 @@ class StrategyNetworkQ():
 
     def _load_model(self, fname):
         #Load
-        print 'loading from', self.fname, '...'
+        log.info('loading from %s...', self.fname)
         return load_model(fname)
     
     def save(self, epoch=0):
@@ -43,7 +46,7 @@ class StrategyNetworkQ():
         else:
             epoch = ''
         self.model.save(self.fname+epoch)
-        print 'saved to', self.fname+epoch
+        log.info('saved to '+self.fname+epoch)
 
     def get_all(self, state):
         return self.model.predict(state)

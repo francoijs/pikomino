@@ -1,6 +1,7 @@
 #!/usr/bin/python
+# pylint: disable=multiple-imports
 
-import time, sys, signal, argparse
+import time, signal, argparse, logging
 from strategy import episode, s_setparams
 
 
@@ -11,6 +12,10 @@ DEFAULT_ALPHA    = .3
 DEFAULT_EPSILON  = .1
 DEFAULT_LAYERS   = 3
 running = True
+
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger('main')
+
 
 def main():
     # parse args
@@ -30,12 +35,12 @@ def main():
     parser.add_argument('--debug', '-d', action='store_true', default=False, 
                         help='display debug log')
     args = parser.parse_args()
-    print str(args)
+    log.debug(args)
     # params of training
     EPISODES = args.episodes
     STEP     = args.step
     # learning mode
-    s_setparams(args.alpha, args.epsilon, log=args.debug)
+    s_setparams(args.alpha, args.epsilon, debug=args.debug)
     if args.hash:
         from q_hash import StrategyHashQ
         q = StrategyHashQ(DBNAME)
@@ -43,20 +48,20 @@ def main():
         from q_network import StrategyNetworkQ
         q = StrategyNetworkQ(DBNAME, layers=args.layers)
     # counters
-    won = all = rate = tot_score = mark = tot_mark = tot_null = tot_rounds = 0
+    won = episodes = rate = tot_score = mark = tot_mark = tot_null = tot_rounds = 0
     time0 = time.time()
     while running:
         reward,score,mark,rounds = episode(q)
         if reward>0:
             won += 1
             tot_score += score
-        all += 1
+        episodes += 1
         tot_mark += mark
         tot_rounds += rounds
         if score==0:
             tot_null += 1
         mark = score = 0
-        if not all % STEP:
+        if not episodes % STEP:
             perf = (time.time() - time0) * float(1000) / STEP
             rate = 100 * float(won)/STEP
             null_rate = 100 * float(tot_null)/STEP
@@ -65,17 +70,17 @@ def main():
                 avg_score = float(tot_score)/won
             else:
                 avg_score = 0
-            print 'games: %d / won: %.1f%% of last %d / rounds: %.1f/game / null: %.1f%% / avg score: %.1f / avg mark: %.1f%% / time: %.3fms/game' % (
-                all, rate, STEP, float(tot_rounds)/STEP, null_rate, avg_score, avg_mark, perf)
+            log.info('games: %d / won: %.1f%% of last %d / rounds: %.1f/game / null: %.1f%% / avg score: %.1f / avg mark: %.1f%% / time: %.3fms/game',
+                episodes, rate, STEP, float(tot_rounds)/STEP, null_rate, avg_score, avg_mark, perf)
             won = tot_null = tot_score = tot_mark = tot_rounds = 0
-            q.save(epoch=all)
+            q.save(epoch=episodes)
             time0 = time.time()
-        if all == EPISODES:
+        if episodes == EPISODES:
             break    
     q.save()
 
-def stop(signum, frame):
-    print 'stopping...'
+def stop(_signum, _frame):
+    log.info('stopping...')
     global running
     running = False
     

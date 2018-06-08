@@ -19,7 +19,7 @@ def main(argv=sys.argv):
     args = parser.parse_args()
     print str(args)
     # playing mode
-    strategy.s_setparams(0, 0, log=True)
+    strategy.s_setparams(0, 0, debug=True)
     q = StrategyNetworkQ(DBNAME, layers=args.layers)
     # initial state
     ai_state = State()

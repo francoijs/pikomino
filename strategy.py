@@ -1,20 +1,21 @@
-import copy, random, bisect
+import copy, random, bisect, logging
 import numpy as np
-from q_hash import HashQ
 from state import State
 
 
-LOG = False
 ALPHA = 0.3    # learning rate
 EPSILON = 0.1
 
+log = logging.getLogger('episode')
 
-def s_setparams(alpha, epsilon, log=False):
-    global ALPHA, EPSILON, LOG
+
+def s_setparams(alpha, epsilon, debug=False):
+    global ALPHA, EPSILON
     ALPHA = alpha
     EPSILON = epsilon
-    print 'strategy: alpha=%.1f / epsilon=%.1f' % (ALPHA, EPSILON)
-    LOG = log
+    log.debug('strategy: alpha=%.1f / epsilon=%.1f', ALPHA, EPSILON)
+    if debug:
+        log.setLevel(logging.DEBUG)
 
 def episode(q):
     """ Run an episode and return final state, reward, my score """
@@ -26,8 +27,7 @@ def episode(q):
     while True:
         state0 = copy.deepcopy(state)
         action,candidates = policy(state, q)
-        if LOG:
-            print 'candidates:', state, ':', candidates
+        log.debug('candidates: %s: %s', state, candidates)
         state = state.transition(action)
         # end of game?
         if not state.stash:
@@ -49,8 +49,7 @@ def episode(q):
         new = old + ALPHA * ( reward + qsa - old )
         q.set(state0.inputs(), action, new)
         # log transition
-        if LOG:
-            print 'transition:', state0, '--|%d|->' % (action), state
+        log.debug('transition: %s --|%d|-> %s', state0, action, state)
         if reward:
             # game is over
             break

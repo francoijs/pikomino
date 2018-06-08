@@ -1,18 +1,20 @@
 #!/usr/bin/python
 
-import time, sys, piko
+import logging
 from strategy import episode, s_setparams
-from q_hash import StrategyHashQ
 
 
 DBNAME = 'strategy'
 
+logging.basicConfig(level=logging.INFO)
+
+
 def main():
     # playing mode
-    s_setparams(0, 0, log=True)
+    s_setparams(0, 0, debug=True)
     from q_network import StrategyNetworkQ
     q = StrategyNetworkQ(DBNAME)
-    reward,score = episode(q)
+    reward,score,_,_ = episode(q)
     print 'end:',reward,score
 
 
