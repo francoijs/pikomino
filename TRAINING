@@ -1,41 +1,34 @@
 CONVERGES IN 5000 GAMES
 
+INFO:main:games: 5000 / won: 26.6% of last 500 / rounds: 26.2/game / null: 12.2% / avg score: 8.1 / avg mark: 3.5% / time: 561.473ms/game
+INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-5000
 
-(tensorflow) 
-[19250:19242 - 1:2120] 12:43:02 [francois@thinkpad:o +1] ~/workspace/ml/piko (1net)  
-$ ./strain.py  -e 7000 -s 500
-Namespace(alpha=0.3, debug=False, episodes=7000, epsilon=0.1, hash=False, layers=3, step=500)
-strategy: alpha=0.3 / epsilon=0.1
+$ ./strain.py  -e 6000 -s 500
 /usr/local/lib/python2.7/dist-packages/h5py/__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.
   from ._conv import register_converters as _register_converters
 Using TensorFlow backend.
-creating new model strategy-237inputs-3hidden.h5
-games: 500 / won: 5.4% of last 500 / rounds: 18.8/game / null: 81.4% / avg score: 1.8 / avg mark: 0.2% / time: 608.078ms/game
-saved to strategy-237inputs-3hidden.h5-500
-games: 1000 / won: 7.8% of last 500 / rounds: 19.8/game / null: 67.8% / avg score: 4.1 / avg mark: 0.7% / time: 595.430ms/game
-saved to strategy-237inputs-3hidden.h5-1000
-games: 1500 / won: 24.6% of last 500 / rounds: 25.7/game / null: 14.2% / avg score: 6.7 / avg mark: 2.9% / time: 672.603ms/game
-saved to strategy-237inputs-3hidden.h5-1500
-games: 2000 / won: 25.4% of last 500 / rounds: 26.0/game / null: 12.2% / avg score: 7.4 / avg mark: 3.1% / time: 641.980ms/game
-saved to strategy-237inputs-3hidden.h5-2000
-games: 2500 / won: 26.0% of last 500 / rounds: 26.3/game / null: 11.8% / avg score: 7.7 / avg mark: 3.4% / time: 659.235ms/game
-saved to strategy-237inputs-3hidden.h5-2500
-games: 3000 / won: 25.4% of last 500 / rounds: 25.9/game / null: 12.6% / avg score: 7.1 / avg mark: 3.1% / time: 810.667ms/game
-saved to strategy-237inputs-3hidden.h5-3000
-games: 3500 / won: 25.4% of last 500 / rounds: 26.1/game / null: 10.6% / avg score: 7.5 / avg mark: 3.3% / time: 679.476ms/game
-saved to strategy-237inputs-3hidden.h5-3500
-games: 4000 / won: 23.2% of last 500 / rounds: 26.3/game / null: 11.8% / avg score: 8.2 / avg mark: 3.5% / time: 667.259ms/game
-saved to strategy-237inputs-3hidden.h5-4000
-games: 4500 / won: 26.8% of last 500 / rounds: 26.1/game / null: 7.6% / avg score: 7.9 / avg mark: 3.4% / time: 658.255ms/game
-saved to strategy-237inputs-3hidden.h5-4500
-games: 5000 / won: 24.4% of last 500 / rounds: 26.0/game / null: 13.4% / avg score: 7.7 / avg mark: 3.1% / time: 723.039ms/game
-saved to strategy-237inputs-3hidden.h5-5000
-games: 5500 / won: 25.6% of last 500 / rounds: 26.1/game / null: 11.8% / avg score: 8.2 / avg mark: 3.3% / time: 700.737ms/game
-saved to strategy-237inputs-3hidden.h5-5500
-games: 6000 / won: 25.6% of last 500 / rounds: 25.8/game / null: 12.0% / avg score: 7.8 / avg mark: 3.0% / time: 751.690ms/game
-saved to strategy-237inputs-3hidden.h5-6000
-games: 6500 / won: 9.8% of last 500 / rounds: 18.4/game / null: 69.0% / avg score: 3.9 / avg mark: 0.4% / time: 624.377ms/game
-saved to strategy-237inputs-3hidden.h5-6500
-games: 7000 / won: 9.4% of last 500 / rounds: 18.6/game / null: 75.0% / avg score: 2.1 / avg mark: 0.3% / time: 607.663ms/game
-saved to strategy-237inputs-3hidden.h5-7000
-saved to strategy-237inputs-3hidden.h5
+INFO:StrategyNetworkQ:creating new model strategy-237inputs-3hidden.h5
+INFO:main:games: 500 / won: 6.8% of last 500 / rounds: 19.1/game / null: 78.8% / avg score: 2.4 / avg mark: 0.3% / time: 469.831ms/game
+INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-500
+INFO:main:games: 1000 / won: 13.2% of last 500 / rounds: 21.7/game / null: 49.2% / avg score: 5.4 / avg mark: 1.4% / time: 493.910ms/game
+INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-1000
+INFO:main:games: 1500 / won: 29.4% of last 500 / rounds: 25.7/game / null: 13.2% / avg score: 6.6 / avg mark: 2.9% / time: 540.890ms/game
+INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-1500
+INFO:main:games: 2000 / won: 27.0% of last 500 / rounds: 25.6/game / null: 12.2% / avg score: 7.5 / avg mark: 2.9% / time: 535.325ms/game
+INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-2000
+INFO:main:games: 2500 / won: 26.0% of last 500 / rounds: 26.2/game / null: 12.2% / avg score: 7.5 / avg mark: 3.5% / time: 544.562ms/game
+INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-2500
+INFO:main:games: 3000 / won: 22.6% of last 500 / rounds: 26.2/game / null: 15.2% / avg score: 7.8 / avg mark: 3.4% / time: 552.400ms/game
+INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-3000
+INFO:main:games: 3500 / won: 22.8% of last 500 / rounds: 26.5/game / null: 12.8% / avg score: 7.4 / avg mark: 3.6% / time: 565.690ms/game
+INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-3500
+INFO:main:games: 4000 / won: 22.6% of last 500 / rounds: 26.2/game / null: 11.0% / avg score: 7.4 / avg mark: 3.5% / time: 578.620ms/game
+INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-4000
+INFO:main:games: 4500 / won: 22.0% of last 500 / rounds: 26.1/game / null: 10.4% / avg score: 7.3 / avg mark: 3.3% / time: 557.245ms/game
+INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-4500
+INFO:main:games: 5000 / won: 26.6% of last 500 / rounds: 26.2/game / null: 12.2% / avg score: 8.1 / avg mark: 3.5% / time: 561.473ms/game
+INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-5000
+INFO:main:games: 500 / won: 24.8% of last 500 / rounds: 26.1/game / null: 12.0% / avg score: 7.8 / avg mark: 3.2% / time: 487.815ms/game
+INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-5500
+INFO:main:games: 1000 / won: 22.8% of last 500 / rounds: 23.3/game / null: 26.8% / avg score: 4.6 / avg mark: 1.6% / time: 487.333ms/game
+INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-6000
