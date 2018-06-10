@@ -54,16 +54,15 @@ def main():
     won = episodes = rate = tot_score = mark = tot_mark = tot_null = tot_rounds = 0
     time0 = time.time()
     while running:
-        reward,score,mark,rounds = episode(q)
+        reward,state,mark,rounds = episode(q)
         if reward>0:
             won += 1
-            tot_score += score
+            tot_score += state.player_score()
         episodes += 1
         tot_mark += mark
         tot_rounds += rounds
-        if score==0:
+        if state.player_score()==0:
             tot_null += 1
-        mark = score = 0
         if not episodes % STEP:
             perf = (time.time() - time0) * float(1000) / STEP
             rate = 100 * float(won)/STEP

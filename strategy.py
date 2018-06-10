@@ -17,14 +17,21 @@ def s_setparams(alpha, epsilon, debug=False):
     if debug:
         log.setLevel(logging.DEBUG)
 
-def episode(q):
+def episode(q_player, q_opponent=None):
     """ Run an episode and return final state, reward, my score """
+    # DQN of opponent
+    if not q_opponent:
+        q_opponent = q_player
     # initial state
     state = State()
     my_turn = True
     # number of steal
     rounds = steal = opp_top_tile = 0
     while True:
+        if my_turn:
+            q = q_player
+        else:
+            q = q_opponent
         state0 = copy.deepcopy(state)
         action,candidates,allq0 = policy(state, q)
         log.debug('candidates: %s: %s', state, candidates)
@@ -39,13 +46,14 @@ def episode(q):
         else:
             # game not over
             reward = 0
-            if candidates:
+            # no need to compute qsa if alpha=0 (no training)
+            if ALPHA and candidates:
                 allq = q.get_all(state.inputs())
                 qsa = max([allq[0,a] for a in candidates])
             else:
                 qsa = 0
-        # update q(state0,action)
-        if action != -1:
+        # update q(state0,action) if training is active
+        if ALPHA and action!=-1:
             old = allq0[0,action]
             new = old + ALPHA * ( reward + qsa - old )
             q.set(state0.inputs(), action, new, allq0)
@@ -65,7 +73,7 @@ def episode(q):
                 opp_top_tile = 0
             state = state.change_turn()
             my_turn = not my_turn
-    return reward, (state.player_score() if my_turn else state.opponent_score()), steal, rounds
+    return reward, (state if my_turn else state.change_turn()), steal, rounds
 
 def policy(state, q):
     """

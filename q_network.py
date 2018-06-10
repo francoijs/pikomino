@@ -17,7 +17,9 @@ log = logging.getLogger('StrategyNetworkQ')
 class StrategyNetworkQ():
 
     def __init__(self, fname, layers=3):
-        self.fname = '%s-%dinputs-%dhidden.h5' % (fname, INPUTS, layers)
+        if fname.find('.h5') == -1:
+            fname = '%s-%dinputs-%dhidden.h5' % (fname, INPUTS, layers)
+        self.fname = fname
         if not os.path.isfile(self.fname):
             self.model = self._new_model(layers)
         else:
