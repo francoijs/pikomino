@@ -1,34 +1,115 @@
-CONVERGES IN 5000 GAMES
+3-layers: converges in 2500 games
 
-INFO:main:games: 5000 / won: 26.6% of last 500 / rounds: 26.2/game / null: 12.2% / avg score: 8.1 / avg mark: 3.5% / time: 561.473ms/game
-INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-5000
+[2018-06-10 12:09:31,446] INFO main: games: 2500 / won: 25.0% of last 500 / rounds: 25.7/game / null: 9.8% / avg score: 7.8 / avg mark: 3.0% / time: 478.211ms/game
+[2018-06-10 12:09:31,464] INFO StrategyNetworkQ: saved to strategy-237inputs-3hidden.h5-2500
 
-$ ./strain.py  -e 6000 -s 500
+$ ./strain.py  -e 7000 -s 500
 /usr/local/lib/python2.7/dist-packages/h5py/__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.
   from ._conv import register_converters as _register_converters
 Using TensorFlow backend.
-INFO:StrategyNetworkQ:creating new model strategy-237inputs-3hidden.h5
-INFO:main:games: 500 / won: 6.8% of last 500 / rounds: 19.1/game / null: 78.8% / avg score: 2.4 / avg mark: 0.3% / time: 469.831ms/game
-INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-500
-INFO:main:games: 1000 / won: 13.2% of last 500 / rounds: 21.7/game / null: 49.2% / avg score: 5.4 / avg mark: 1.4% / time: 493.910ms/game
-INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-1000
-INFO:main:games: 1500 / won: 29.4% of last 500 / rounds: 25.7/game / null: 13.2% / avg score: 6.6 / avg mark: 2.9% / time: 540.890ms/game
-INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-1500
-INFO:main:games: 2000 / won: 27.0% of last 500 / rounds: 25.6/game / null: 12.2% / avg score: 7.5 / avg mark: 2.9% / time: 535.325ms/game
-INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-2000
-INFO:main:games: 2500 / won: 26.0% of last 500 / rounds: 26.2/game / null: 12.2% / avg score: 7.5 / avg mark: 3.5% / time: 544.562ms/game
-INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-2500
-INFO:main:games: 3000 / won: 22.6% of last 500 / rounds: 26.2/game / null: 15.2% / avg score: 7.8 / avg mark: 3.4% / time: 552.400ms/game
-INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-3000
-INFO:main:games: 3500 / won: 22.8% of last 500 / rounds: 26.5/game / null: 12.8% / avg score: 7.4 / avg mark: 3.6% / time: 565.690ms/game
-INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-3500
-INFO:main:games: 4000 / won: 22.6% of last 500 / rounds: 26.2/game / null: 11.0% / avg score: 7.4 / avg mark: 3.5% / time: 578.620ms/game
-INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-4000
-INFO:main:games: 4500 / won: 22.0% of last 500 / rounds: 26.1/game / null: 10.4% / avg score: 7.3 / avg mark: 3.3% / time: 557.245ms/game
-INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-4500
-INFO:main:games: 5000 / won: 26.6% of last 500 / rounds: 26.2/game / null: 12.2% / avg score: 8.1 / avg mark: 3.5% / time: 561.473ms/game
-INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-5000
-INFO:main:games: 500 / won: 24.8% of last 500 / rounds: 26.1/game / null: 12.0% / avg score: 7.8 / avg mark: 3.2% / time: 487.815ms/game
-INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-5500
-INFO:main:games: 1000 / won: 22.8% of last 500 / rounds: 23.3/game / null: 26.8% / avg score: 4.6 / avg mark: 1.6% / time: 487.333ms/game
-INFO:StrategyNetworkQ:saved to strategy-237inputs-3hidden.h5-6000
+[2018-06-10 11:50:32,770] INFO StrategyNetworkQ: creating new model strategy-237inputs-3hidden.h5
+[2018-06-10 11:53:48,122] INFO main: games: 500 / won: 6.8% of last 500 / rounds: 19.6/game / null: 71.4% / avg score: 2.7 / avg mark: 0.4% / time: 390.574ms/game
+[2018-06-10 11:53:48,194] INFO StrategyNetworkQ: saved to strategy-237inputs-3hidden.h5-500
+[2018-06-10 11:57:14,933] INFO main: games: 1000 / won: 15.0% of last 500 / rounds: 22.1/game / null: 51.4% / avg score: 5.5 / avg mark: 1.4% / time: 413.478ms/game
+[2018-06-10 11:57:14,952] INFO StrategyNetworkQ: saved to strategy-237inputs-3hidden.h5-1000
+[2018-06-10 12:00:49,034] INFO main: games: 1500 / won: 25.0% of last 500 / rounds: 25.5/game / null: 14.2% / avg score: 7.6 / avg mark: 2.8% / time: 428.164ms/game
+[2018-06-10 12:00:49,052] INFO StrategyNetworkQ: saved to strategy-237inputs-3hidden.h5-1500
+[2018-06-10 12:05:32,313] INFO main: games: 2000 / won: 28.4% of last 500 / rounds: 26.0/game / null: 11.8% / avg score: 7.4 / avg mark: 3.2% / time: 566.523ms/game
+[2018-06-10 12:05:32,340] INFO StrategyNetworkQ: saved to strategy-237inputs-3hidden.h5-2000
+[2018-06-10 12:09:31,446] INFO main: games: 2500 / won: 25.0% of last 500 / rounds: 25.7/game / null: 9.8% / avg score: 7.8 / avg mark: 3.0% / time: 478.211ms/game
+[2018-06-10 12:09:31,464] INFO StrategyNetworkQ: saved to strategy-237inputs-3hidden.h5-2500
+[2018-06-10 12:13:00,254] INFO main: games: 3000 / won: 27.8% of last 500 / rounds: 25.1/game / null: 13.0% / avg score: 6.7 / avg mark: 2.3% / time: 417.579ms/game
+[2018-06-10 12:13:00,273] INFO StrategyNetworkQ: saved to strategy-237inputs-3hidden.h5-3000
+[2018-06-10 12:16:15,042] INFO main: games: 3500 / won: 18.4% of last 500 / rounds: 23.2/game / null: 37.8% / avg score: 3.9 / avg mark: 1.3% / time: 389.539ms/game
+[2018-06-10 12:16:15,061] INFO StrategyNetworkQ: saved to strategy-237inputs-3hidden.h5-3500
+[2018-06-10 12:19:11,185] INFO main: games: 4000 / won: 10.0% of last 500 / rounds: 20.1/game / null: 63.2% / avg score: 2.2 / avg mark: 0.5% / time: 352.248ms/game
+[2018-06-10 12:19:11,204] INFO StrategyNetworkQ: saved to strategy-237inputs-3hidden.h5-4000
+[2018-06-10 12:22:15,916] INFO main: games: 4500 / won: 15.6% of last 500 / rounds: 21.0/game / null: 55.8% / avg score: 3.0 / avg mark: 0.7% / time: 369.424ms/game
+[2018-06-10 12:22:15,936] INFO StrategyNetworkQ: saved to strategy-237inputs-3hidden.h5-4500
+[2018-06-10 12:25:12,404] INFO main: games: 5000 / won: 16.4% of last 500 / rounds: 20.7/game / null: 52.2% / avg score: 3.7 / avg mark: 0.9% / time: 352.936ms/game
+[2018-06-10 12:25:12,423] INFO StrategyNetworkQ: saved to strategy-237inputs-3hidden.h5-5000
+[2018-06-10 12:27:54,558] INFO main: games: 5500 / won: 7.8% of last 500 / rounds: 18.3/game / null: 72.8% / avg score: 2.2 / avg mark: 0.3% / time: 324.270ms/game
+[2018-06-10 12:27:54,577] INFO StrategyNetworkQ: saved to strategy-237inputs-3hidden.h5-5500
+^C[2018-06-10 12:28:49,023] INFO main: stopping...
+[2018-06-10 12:28:49,289] INFO StrategyNetworkQ: saved to strategy-237inputs-3hidden.h5
+
+---
+4-layers: converges in 1500 games
+
+[2018-06-10 12:40:26,186] INFO main: games: 1500 / won: 25.4% of last 500 / rounds: 25.9/game / null: 13.2% / avg score: 7.1 / avg mark: 3.1% / time: 464.554ms/game
+[2018-06-10 12:40:26,207] INFO StrategyNetworkQ: saved to strategy-237inputs-4hidden.h5-1500
+
+$ ./strain.py  -e 7000 -s 500 -l 4
+/usr/local/lib/python2.7/dist-packages/h5py/__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.
+  from ._conv import register_converters as _register_converters
+Using TensorFlow backend.
+[2018-06-10 12:29:41,043] INFO StrategyNetworkQ: creating new model strategy-237inputs-4hidden.h5
+[2018-06-10 12:32:44,077] INFO main: games: 500 / won: 10.0% of last 500 / rounds: 18.0/game / null: 76.4% / avg score: 2.0 / avg mark: 0.2% / time: 365.917ms/game
+[2018-06-10 12:32:44,133] INFO StrategyNetworkQ: saved to strategy-237inputs-4hidden.h5-500
+[2018-06-10 12:36:33,887] INFO main: games: 1000 / won: 19.8% of last 500 / rounds: 24.8/game / null: 21.0% / avg score: 6.6 / avg mark: 2.5% / time: 459.508ms/game
+[2018-06-10 12:36:33,909] INFO StrategyNetworkQ: saved to strategy-237inputs-4hidden.h5-1000
+[2018-06-10 12:40:26,186] INFO main: games: 1500 / won: 25.4% of last 500 / rounds: 25.9/game / null: 13.2% / avg score: 7.1 / avg mark: 3.1% / time: 464.554ms/game
+[2018-06-10 12:40:26,207] INFO StrategyNetworkQ: saved to strategy-237inputs-4hidden.h5-1500
+[2018-06-10 12:45:06,369] INFO main: games: 2000 / won: 25.6% of last 500 / rounds: 26.4/game / null: 12.2% / avg score: 7.1 / avg mark: 3.5% / time: 560.324ms/game
+[2018-06-10 12:45:06,390] INFO StrategyNetworkQ: saved to strategy-237inputs-4hidden.h5-2000
+[2018-06-10 12:48:20,546] INFO main: games: 2500 / won: 9.4% of last 500 / rounds: 19.0/game / null: 68.2% / avg score: 6.6 / avg mark: 1.1% / time: 388.311ms/game
+[2018-06-10 12:48:20,567] INFO StrategyNetworkQ: saved to strategy-237inputs-4hidden.h5-2500
+^[w[2018-06-10 12:51:09,892] INFO main: games: 3000 / won: 1.6% of last 500 / rounds: 15.6/game / null: 95.6% / avg score: 1.0 / avg mark: 0.0% / time: 338.649ms/game
+[2018-06-10 12:51:09,913] INFO StrategyNetworkQ: saved to strategy-237inputs-4hidden.h5-3000
+[2018-06-10 12:53:52,437] INFO main: games: 3500 / won: 2.0% of last 500 / rounds: 15.6/game / null: 93.4% / avg score: 1.0 / avg mark: 0.0% / time: 325.048ms/game
+[2018-06-10 12:53:52,458] INFO StrategyNetworkQ: saved to strategy-237inputs-4hidden.h5-3500
+^C[2018-06-10 12:53:57,417] INFO main: stopping...
+[2018-06-10 12:53:57,673] INFO StrategyNetworkQ: saved to strategy-237inputs-4hidden.h5
+
+---
+5-layers: converges in 2000 games
+
+[2018-06-10 18:18:29,484] INFO main: games: 2000 / won: 22.6% of last 500 / rounds: 25.8/game / null: 13.8% / avg score: 7.1 / avg mark: 3.0% / time: 550.309ms/game
+[2018-06-10 18:18:29,510] INFO StrategyNetworkQ: saved to strategy-237inputs-5hidden.h5-2000
+
+$ ./strain.py  -e 10000 -s 500 -l 5
+/usr/local/lib/python2.7/dist-packages/h5py/__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.
+  from ._conv import register_converters as _register_converters
+Using TensorFlow backend.
+[2018-06-10 18:01:39,034] INFO StrategyNetworkQ: creating new model strategy-237inputs-5hidden.h5
+[2018-06-10 18:05:05,235] INFO main: games: 500 / won: 6.0% of last 500 / rounds: 17.4/game / null: 86.2% / avg score: 2.4 / avg mark: 0.1% / time: 412.240ms/game
+[2018-06-10 18:05:05,302] INFO StrategyNetworkQ: saved to strategy-237inputs-5hidden.h5-500
+[2018-06-10 18:08:54,105] INFO main: games: 1000 / won: 11.0% of last 500 / rounds: 19.7/game / null: 66.2% / avg score: 4.3 / avg mark: 0.7% / time: 457.607ms/game
+[2018-06-10 18:08:54,136] INFO StrategyNetworkQ: saved to strategy-237inputs-5hidden.h5-1000
+[2018-06-10 18:13:54,305] INFO main: games: 1500 / won: 21.4% of last 500 / rounds: 25.6/game / null: 14.0% / avg score: 7.2 / avg mark: 2.9% / time: 600.339ms/game
+[2018-06-10 18:13:54,330] INFO StrategyNetworkQ: saved to strategy-237inputs-5hidden.h5-1500
+[2018-06-10 18:18:29,484] INFO main: games: 2000 / won: 22.6% of last 500 / rounds: 25.8/game / null: 13.8% / avg score: 7.1 / avg mark: 3.0% / time: 550.309ms/game
+[2018-06-10 18:18:29,510] INFO StrategyNetworkQ: saved to strategy-237inputs-5hidden.h5-2000
+[2018-06-10 18:23:04,165] INFO main: games: 2500 / won: 23.2% of last 500 / rounds: 25.9/game / null: 14.6% / avg score: 7.1 / avg mark: 3.0% / time: 549.310ms/game
+[2018-06-10 18:23:04,190] INFO StrategyNetworkQ: saved to strategy-237inputs-5hidden.h5-2500
+[2018-06-10 18:26:29,390] INFO main: games: 3000 / won: 5.0% of last 500 / rounds: 17.7/game / null: 79.8% / avg score: 7.0 / avg mark: 0.7% / time: 410.399ms/game
+[2018-06-10 18:26:29,416] INFO StrategyNetworkQ: saved to strategy-237inputs-5hidden.h5-3000
+[2018-06-10 18:30:01,411] INFO main: games: 3500 / won: 1.2% of last 500 / rounds: 15.6/game / null: 95.4% / avg score: 1.0 / avg mark: 0.0% / time: 423.990ms/game
+[2018-06-10 18:30:01,436] INFO StrategyNetworkQ: saved to strategy-237inputs-5hidden.h5-3500
+^C[2018-06-10 18:30:08,313] INFO main: stopping...
+[2018-06-10 18:30:08,566] INFO StrategyNetworkQ: saved to strategy-237inputs-5hidden.h5
+
+---
+6-layers: no convergence
+
+$ ./strain.py  -e 10000 -s 500 -l 6
+/usr/local/lib/python2.7/dist-packages/h5py/__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.
+  from ._conv import register_converters as _register_converters
+Using TensorFlow backend.
+[2018-06-10 18:31:21,909] INFO StrategyNetworkQ: creating new model strategy-237inputs-6hidden.h5
+[2018-06-10 18:36:44,309] INFO main: games: 500 / won: 12.4% of last 500 / rounds: 19.1/game / null: 67.2% / avg score: 2.4 / avg mark: 0.3% / time: 644.630ms/game
+[2018-06-10 18:36:44,429] INFO StrategyNetworkQ: saved to strategy-237inputs-6hidden.h5-500
+[2018-06-10 18:41:27,091] INFO main: games: 1000 / won: 5.8% of last 500 / rounds: 17.1/game / null: 87.0% / avg score: 1.6 / avg mark: 0.1% / time: 565.322ms/game
+[2018-06-10 18:41:27,119] INFO StrategyNetworkQ: saved to strategy-237inputs-6hidden.h5-1000
+[2018-06-10 18:45:37,788] INFO main: games: 1500 / won: 3.8% of last 500 / rounds: 17.1/game / null: 87.6% / avg score: 1.8 / avg mark: 0.1% / time: 501.339ms/game
+[2018-06-10 18:45:37,817] INFO StrategyNetworkQ: saved to strategy-237inputs-6hidden.h5-1500
+[2018-06-10 18:49:50,817] INFO main: games: 2000 / won: 3.0% of last 500 / rounds: 15.7/game / null: 95.0% / avg score: 1.1 / avg mark: 0.0% / time: 506.001ms/game
+[2018-06-10 18:49:50,847] INFO StrategyNetworkQ: saved to strategy-237inputs-6hidden.h5-2000
+[2018-06-10 18:54:36,503] INFO main: games: 2500 / won: 2.4% of last 500 / rounds: 15.6/game / null: 94.0% / avg score: 1.1 / avg mark: 0.0% / time: 571.312ms/game
+[2018-06-10 18:54:36,552] INFO StrategyNetworkQ: saved to strategy-237inputs-6hidden.h5-2500
+[2018-06-10 18:58:56,044] INFO main: games: 3000 / won: 1.0% of last 500 / rounds: 15.5/game / null: 97.0% / avg score: 1.2 / avg mark: 0.0% / time: 518.984ms/game
+[2018-06-10 18:58:56,072] INFO StrategyNetworkQ: saved to strategy-237inputs-6hidden.h5-3000
+[2018-06-10 19:03:20,304] INFO main: games: 3500 / won: 1.4% of last 500 / rounds: 15.6/game / null: 94.2% / avg score: 1.3 / avg mark: 0.0% / time: 528.464ms/game
+[2018-06-10 19:03:20,343] INFO StrategyNetworkQ: saved to strategy-237inputs-6hidden.h5-3500
+^C[2018-06-10 19:06:12,794] INFO main: stopping...
+[2018-06-10 19:06:12,941] INFO StrategyNetworkQ: saved to strategy-237inputs-6hidden.h5
