@@ -59,7 +59,7 @@ def main(argv=sys.argv):
         ai_state = my_state.change_turn()
         while True:
             prev_state = copy.deepcopy(ai_state)
-            action,_ = strategy.policy(ai_state, q)
+            action,_,_ = strategy.policy(ai_state, q)
             ai_state = ai_state.transition(action)
             print 'transition:', prev_state, '--|%d|->' % (action), ai_state
             if ai_state.end_of_turn():

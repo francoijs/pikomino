@@ -26,7 +26,7 @@ def episode(q):
     rounds = steal = opp_top_tile = 0
     while True:
         state0 = copy.deepcopy(state)
-        action,candidates = policy(state, q)
+        action,candidates,allq = policy(state, q)
         log.debug('candidates: %s: %s', state, candidates)
         state = state.transition(action)
         # end of game?
@@ -40,7 +40,6 @@ def episode(q):
             # game not over
             reward = 0
             if candidates:
-                allq = q.get_all(state.inputs())
                 qsa = max([allq[0,a] for a in candidates])
             else:
                 qsa = 0
@@ -76,12 +75,12 @@ def policy(state, q):
     candidates = state.find_candidates()
     if len(candidates) == 0:
         # no dice available -> this roll is lost
-        action = -1
-    elif random.random() < EPSILON:
+        return -1, [], []
+    allQ = q.get_all(state.inputs())
+    if random.random() < EPSILON:
         # exploration
         action = random.choice(candidates)
     else:
         # return best action
-        allQ = q.get_all(state.inputs())
         action = candidates[ max(range(len(candidates)), key=lambda i: allQ[0,candidates[i]]) ]
-    return action, candidates
+    return action, candidates, allQ
