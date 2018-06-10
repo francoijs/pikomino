@@ -26,7 +26,7 @@ def episode(q):
     rounds = steal = opp_top_tile = 0
     while True:
         state0 = copy.deepcopy(state)
-        action,candidates,allq = policy(state, q)
+        action,candidates,allq0 = policy(state, q)
         log.debug('candidates: %s: %s', state, candidates)
         state = state.transition(action)
         # end of game?
@@ -40,13 +40,15 @@ def episode(q):
             # game not over
             reward = 0
             if candidates:
+                allq = q.get_all(state.inputs())
                 qsa = max([allq[0,a] for a in candidates])
             else:
                 qsa = 0
         # update q(state0,action)
-        old = q.get(state0.inputs(), action)
-        new = old + ALPHA * ( reward + qsa - old )
-        q.set(state0.inputs(), action, new)
+        if action != -1:
+            old = allq0[0,action]
+            new = old + ALPHA * ( reward + qsa - old )
+            q.set(state0.inputs(), action, new, allq0)
         # log transition
         log.debug('transition: %s --|%d|-> %s', state0, action, state)
         if reward:

@@ -52,7 +52,8 @@ class StrategyNetworkQ():
         return self.model.predict(state)
     def get(self, state, action):
         return self.get_all(state)[0,action]
-    def set(self, state, action, val):
-        oldQ = self.model.predict(state)
+    def set(self, state, action, val, oldQ=None):
+        if oldQ is None:
+            oldQ = self.model.predict(state)
         oldQ[0,action] = val
         self.model.fit(state, oldQ, epochs=1, verbose=0)
