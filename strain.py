@@ -27,6 +27,8 @@ def main():
                         help='total number of episodes (default=%d)'%(DEFAULT_EPISODES))
     parser.add_argument('--step', '-s', metavar='S', type=int, default=DEFAULT_STEP,
                         help='number of episodes per step (default=%d)'%(DEFAULT_STEP))
+    parser.add_argument('--offset', metavar='O', type=int, default=0,
+                        help='offset in count of episodes (default=0)')
     parser.add_argument('--hash', action='store_true',
                         help='use hash table instead of NN')
     parser.add_argument('--alpha', metavar='ALPHA', type=float, default=DEFAULT_ALPHA,
@@ -35,6 +37,8 @@ def main():
                         help='exploration ratio (default=%.3f)'%(DEFAULT_EPSILON))
     parser.add_argument('--layers', '-l', metavar='L', type=int, default=DEFAULT_LAYERS,
                         help='number of hidden layers (default=%d)'%(DEFAULT_LAYERS))
+    parser.add_argument('--decay', metavar='K', type=int, default=0,
+                        help='learning rate decay (default=off)')
     parser.add_argument('--debug', '-d', action='store_true', default=False, 
                         help='display debug log')
     args = parser.parse_args()
@@ -75,7 +79,12 @@ def main():
             log.info('games: %d / won: %.1f%% of last %d / rounds: %.1f/game / null: %.1f%% / avg score: %.1f / avg mark: %.1f%% / time: %.3fms/game',
                 episodes, rate, STEP, float(tot_rounds)/STEP, null_rate, avg_score, avg_mark, perf)
             won = tot_null = tot_score = tot_mark = tot_rounds = 0
-            q.save(epoch=episodes)
+            q.save(epoch=(episodes+args.offset))
+            if args.decay:
+                # adjust learning rate with decay
+                alpha = args.alpha * args.decay / (args.decay+episodes+args.offset)
+                s_setparams(alpha, args.epsilon, debug=args.debug)
+                log.info('learning rate: %.3f', alpha)
             time0 = time.time()
         if episodes == EPISODES:
             break    
