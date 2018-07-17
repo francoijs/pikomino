@@ -61,7 +61,7 @@ class State(object):
     def end_turn(self):
         self.roll = _roll(8)
         self.dices = [0,0,0,0,0,0]
-        return self
+        return self, self.get_reward()
 
     def end_of_turn(self):
         return sum(self.dices) == 0
@@ -94,7 +94,7 @@ class State(object):
             # keep some dices then reroll
             self.dices[action] += self.roll[action]
             self.roll = _roll(8-sum(self.dices))
-            return self
+            return self, 0
         else:
             self.transition(action-6)
             if self.opponent and self.total()==self.opponent[-1]:
@@ -115,6 +115,14 @@ class State(object):
         # end of turn
         return self.end_turn()
 
+    def get_reward(self):
+        # reward?
+        if self.stash:
+            return 0
+        else:
+            if self.player_wins():
+                return 1
+        return -1
     
     def find_candidates(self):
         """ Return list of candidates actions """

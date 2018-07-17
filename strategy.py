@@ -35,17 +35,16 @@ def episode(q_player, q_opponent=None):
         state0 = copy.deepcopy(state)
         action,candidates,allq0 = policy(state, q)
         log.debug('candidates: %s: %s', state, candidates)
-        state = state.transition(action)
+        state,reward = state.transition(action)
         # end of game?
-        if not state.stash:
-            # no more tiles in stash
-            if (my_turn and state.player_wins()):
-                qsa = reward = 1    # win
-            else:
-                qsa = reward = -1   # loss or draw
+        if reward:
+            # game over
+            if reward>0 and not my_turn:
+                # opponent won
+                reward = -1
+            qsa = reward
         else:
             # game not over
-            reward = 0
             # no need to compute qsa if alpha=0 (no training)
             if ALPHA and candidates:
                 allq = q.get_all(state.inputs())
