@@ -18,7 +18,7 @@ def s_setparams(alpha, epsilon, debug=False):
         log.setLevel(logging.DEBUG)
 
 def episode(q_player, q_opponent=None):
-    """ Run an episode and return final state, reward, my score """
+    """ Run an episode and return final state. """
     # DQN of opponent
     if not q_opponent:
         q_opponent = q_player
@@ -38,11 +38,8 @@ def episode(q_player, q_opponent=None):
         state,reward = state.transition(action)
         # end of game?
         if reward:
-            # game over
-            if reward>0 and not my_turn:
-                # opponent won
-                reward = -1
-            qsa = reward
+            # terminal step -> game over
+            qsa = 0
         else:
             # game not over
             # no need to compute qsa if alpha=0 (no training)
@@ -65,14 +62,14 @@ def episode(q_player, q_opponent=None):
         if state.end_of_turn():
             rounds += 1
             if state.player and state.player[-1]==opp_top_tile:
-                steal +=1
+                steal += 1
             if state.player:
                 opp_top_tile = state.player[-1]
             else:
                 opp_top_tile = 0
             state = state.change_turn()
             my_turn = not my_turn
-    return reward, (state if my_turn else state.change_turn()), steal, rounds
+    return (state if my_turn else state.change_turn()), steal, rounds
 
 def policy(state, q):
     """

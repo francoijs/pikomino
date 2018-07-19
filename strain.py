@@ -58,8 +58,8 @@ def main():
     won = episodes = rate = tot_score = mark = tot_mark = tot_null = tot_rounds = 0
     time0 = time.time()
     while running:
-        reward,state,mark,rounds = episode(q)
-        if reward>0:
+        state,mark,rounds = episode(q)
+        if state.player_wins():
             won += 1
             tot_score += state.player_score()
         episodes += 1
