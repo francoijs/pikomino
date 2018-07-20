@@ -2,7 +2,7 @@
 # pylint: disable=multiple-imports
 
 import time, signal, argparse, logging
-from strategy import episode, s_setparams
+from strategy import episode, s_setparams, algo_sarsa, algo_qlearning
 
 
 DBNAME = 'strategy'
@@ -31,6 +31,8 @@ def main():
                         help='offset in count of episodes (default=0)')
     parser.add_argument('--hash', action='store_true',
                         help='use hash table instead of NN')
+    parser.add_argument('--algo', metavar='ALGO', type=str, default='q-learning',
+                        help='algo (q-learning or sarsa)')
     parser.add_argument('--alpha', metavar='ALPHA', type=float, default=DEFAULT_ALPHA,
                         help='learning rate (default=%.3f)'%(DEFAULT_ALPHA))
     parser.add_argument('--epsilon', metavar='EPSILON', type=float, default=DEFAULT_EPSILON,
@@ -46,6 +48,11 @@ def main():
     # params of training
     EPISODES = args.episodes
     STEP     = args.step
+    # algo
+    if args.algo == 'sarsa':
+        algo = algo_sarsa
+    else:
+        algo = algo_qlearning
     # learning mode
     s_setparams(args.alpha, args.epsilon, debug=args.debug)
     if args.hash:
@@ -58,7 +65,7 @@ def main():
     won = episodes = rate = tot_score = mark = tot_mark = tot_null = tot_rounds = 0
     time0 = time.time()
     while running:
-        state,mark,rounds = episode(q)
+        state,mark,rounds = episode(q, algo=algo)
         if state.player_wins():
             won += 1
             tot_score += state.player_score()

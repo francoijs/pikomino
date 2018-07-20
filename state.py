@@ -63,6 +63,8 @@ class State(object):
         self.dices = [0,0,0,0,0,0]
         return self, self.get_reward()
 
+    def end_of_game(self):
+        return not self.stash
     def end_of_turn(self):
         return sum(self.dices) == 0
             
