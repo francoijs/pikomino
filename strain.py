@@ -62,16 +62,18 @@ def main():
         from q_network import StrategyNetworkQ
         q = StrategyNetworkQ(DBNAME, layers=args.layers)
     # counters
-    won = episodes = rate = tot_score = mark = tot_mark = tot_null = tot_rounds = 0
+    won = episodes = rate = tot_score = mark = tot_mark = tot_null = tot_turns = tot_rounds = sum_td_error = 0
     time0 = time.time()
     while running:
-        state,mark,rounds = episode(q, algo=algo)
+        state,mark,turns,rounds,stde = episode(q, algo=algo)
         if state.player_wins():
             won += 1
             tot_score += state.player_score()
         episodes += 1
         tot_mark += mark
+        tot_turns += turns
         tot_rounds += rounds
+        sum_td_error += stde
         if state.player_score()==0:
             tot_null += 1
         if not episodes % STEP:
@@ -83,9 +85,9 @@ def main():
                 avg_score = float(tot_score)/won
             else:
                 avg_score = 0
-            log.info('games: %d / won: %.1f%% of last %d / rounds: %.1f/game / null: %.1f%% / avg score: %.1f / avg mark: %.1f%% / time: %.3fms/game',
-                episodes, rate, STEP, float(tot_rounds)/STEP, null_rate, avg_score, avg_mark, perf)
-            won = tot_null = tot_score = tot_mark = tot_rounds = 0
+            log.info('games: %d / won: %.1f%% of last %d / turns: %.1f/game / null: %.1f%% / avg score: %.1f / avg mark: %.1f%% / time: %.3fms/game / mean td error: %.3f',
+                     episodes, rate, STEP, float(tot_turns)/STEP, null_rate, avg_score, avg_mark, perf, float(sum_td_error)/tot_rounds)
+            won = tot_null = tot_score = tot_mark = tot_turns = tot_rounds = sum_td_error = 0
             q.save(epoch=(episodes+args.offset))
             if args.decay:
                 # adjust learning rate with decay

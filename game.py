@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import logging, argparse, signal
-from strategy import episode, s_setparams
+from strategy import episode, s_setparams, algo_play
 
 
 DEFAULT_GAMES=1
@@ -44,7 +44,7 @@ def main():
     log.info('playing <%s> against <%s>...', q1.fname, 'itself' if q1==q2 else q2.fname)
     wins_left = wins_right = draws = played = 0
     for game in range(args.games):
-        state,_,rounds = episode(q1, q2)
+        state,_,rounds,_,_ = episode(q1, q2, algo=algo_play)
         log.info('game %d: rounds=%3d, winner=%s, score=%d/%d',
                  game, rounds,
                  'left' if state.player_wins() else 'right' if state.opponent_wins() else 'draw',

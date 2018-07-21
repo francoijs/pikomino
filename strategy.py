@@ -1,4 +1,4 @@
-import copy, random, bisect, logging
+import copy, random, bisect, logging, math
 import numpy as np
 from state import State
 
@@ -38,11 +38,14 @@ def algo_qlearning(q, state, action):
     # update q(state0,action) if training is active
     if ALPHA and action!=-1:
         old = allq0[0,action]
-        new = old + ALPHA * ( reward + qsa - old )
+        tde = reward + qsa - old
+        new = old + ALPHA * tde
         q.set(state0.inputs(), action, new, allq0)
+    else:
+        tde = 0
     # log transition
     log.debug('transition: %s --|%d|-> %s', state0, action, state)
-    return state, -1
+    return state, -1, tde
 
 def algo_sarsa(q, state, action):
     state0 = copy.deepcopy(state)
@@ -67,11 +70,22 @@ def algo_sarsa(q, state, action):
     # update q(state0,action) if training is active
     if ALPHA and action!=-1:
         old = allq0[0,action]
-        new = old + ALPHA * ( reward + qsa - old )
+        tde = reward + qsa - old
+        new = old + ALPHA * tde
         q.set(state0.inputs(), action, new, allq0)
+    else:
+        tde = 0
     # log transition
     log.debug('transition: %s --|%d|-> %s', state0, action, state)
-    return state, action1
+    return state, action1, tde
+
+def algo_play(q, state, action):
+    state0 = copy.deepcopy(state)
+    action,_,_ = policy(state, q)
+    state,_ = state.transition(action)
+    # log transition
+    log.debug('transition: %s --|%d|-> %s', state0, action, state)
+    return state, -1, 0
 
 def episode(q_player, q_opponent=None, algo=algo_qlearning):
     """ Run an episode and return final state. """
@@ -83,19 +97,21 @@ def episode(q_player, q_opponent=None, algo=algo_qlearning):
     action = -1
     my_turn = True
     # number of steal
-    rounds = steal = opp_top_tile = 0
+    turns = rounds = steal = opp_top_tile = sum_td_error = 0
     while True:
         if my_turn:
             q = q_player
         else:
             q = q_opponent
-        state,action = algo(q, state, action)
+        state,action,td_error = algo(q, state, action)
+        sum_td_error += math.fabs(td_error)
+        rounds += 1
         if state.end_of_game():
             # game is over
             break
         # change player?
         if state.end_of_turn():
-            rounds += 1
+            turns += 1
             if state.player and state.player[-1]==opp_top_tile:
                 steal += 1
             if state.player:
@@ -105,7 +121,7 @@ def episode(q_player, q_opponent=None, algo=algo_qlearning):
             state = state.change_turn()
             action = -1
             my_turn = not my_turn
-    return (state if my_turn else state.change_turn()), steal, rounds
+    return (state if my_turn else state.change_turn()), steal, turns, rounds, sum_td_error
 
 def policy(state, q):
     """
