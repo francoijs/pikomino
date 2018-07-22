@@ -31,8 +31,8 @@ def main():
                         help='offset in count of episodes (default=0)')
     parser.add_argument('--hash', action='store_true',
                         help='use hash table instead of NN')
-    parser.add_argument('--algo', metavar='ALGO', type=str, default='q-learning',
-                        help='algo (q-learning or sarsa)')
+    parser.add_argument('--sarsa', metavar='DECAY', type=int, default=0,
+                        help='use algo sarsa with decaying exploration rate')
     parser.add_argument('--alpha', metavar='ALPHA', type=float, default=DEFAULT_ALPHA,
                         help='learning rate (default=%.3f)'%(DEFAULT_ALPHA))
     parser.add_argument('--epsilon', metavar='EPSILON', type=float, default=DEFAULT_EPSILON,
@@ -49,12 +49,14 @@ def main():
     EPISODES = args.episodes
     STEP     = args.step
     # algo
-    if args.algo == 'sarsa':
+    if args.sarsa:
         algo = algo_sarsa
     else:
         algo = algo_qlearning
     # learning mode
     s_setparams(args.alpha, args.epsilon, debug=args.debug)
+    alpha = args.alpha
+    epsilon = args.epsilon
     if args.hash:
         from q_hash import StrategyHashQ
         q = StrategyHashQ(DBNAME)
@@ -92,8 +94,12 @@ def main():
             if args.decay:
                 # adjust learning rate with decay
                 alpha = args.alpha * args.decay / (args.decay+episodes+args.offset)
-                s_setparams(alpha, args.epsilon, debug=args.debug)
                 log.info('learning rate: %.3f', alpha)
+            if args.sarsa:
+                # sarsa: adjust exploration rate
+                epsilon = args.epsilon * args.sarsa / (args.sarsa+episodes+args.offset)
+                log.info('exploration rate: %.3f', epsilon)
+            s_setparams(alpha, epsilon, debug=args.debug)
             time0 = time.time()
         if episodes == EPISODES:
             break    
