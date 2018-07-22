@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import logging, argparse, signal
-from strategy import episode, s_setparams, algo_play
+from episode import episode, s_setparams, algo_play
 
 
 DEFAULT_GAMES=1

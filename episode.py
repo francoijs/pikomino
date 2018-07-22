@@ -13,7 +13,7 @@ def s_setparams(alpha, epsilon, debug=False):
     global ALPHA, EPSILON
     ALPHA = alpha
     EPSILON = epsilon
-    log.debug('strategy: alpha=%.1f / epsilon=%.1f', ALPHA, EPSILON)
+    log.debug('episode: alpha=%.1f / epsilon=%.1f', ALPHA, EPSILON)
     if debug:
         log.setLevel(logging.DEBUG)
 

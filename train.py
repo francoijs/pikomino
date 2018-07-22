@@ -2,7 +2,7 @@
 # pylint: disable=multiple-imports
 
 import time, signal, argparse, logging
-from strategy import episode, s_setparams, algo_sarsa, algo_qlearning
+from episode import episode, s_setparams, algo_sarsa, algo_qlearning
 
 
 DBNAME = 'strategy'
