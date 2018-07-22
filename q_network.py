@@ -5,6 +5,7 @@ from keras.models import Sequential, load_model
 from keras.layers import Dense
 from keras.optimizers import Adam
 from state import State
+import numpy as np
 
 
 LEARNING_RATE = 0.001
@@ -24,6 +25,9 @@ class StrategyNetworkQ():
             self.model = self._new_model(layers)
         else:
             self.model = self._load_model(self.fname)
+        # cache
+        self._cache_state = None
+        self._cache_q = None
 
     def _new_model(self, layers):
         # Keras/TF
@@ -49,9 +53,13 @@ class StrategyNetworkQ():
             epoch = ''
         self.model.save(self.fname+epoch)
         log.info('saved to '+self.fname+epoch)
-
+        
     def get_all(self, state):
-        return self.model.predict(state)
+        if not np.array_equal(self._cache_state, state):
+            self._cache_state = state
+            self._cache_q = self.model.predict(state)
+        return self._cache_q
+    
     def get(self, state, action):
         return self.get_all(state)[0,action]
     def set(self, state, action, val, oldQ=None):
