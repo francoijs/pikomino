@@ -32,7 +32,7 @@ def main():
     parser.add_argument('--hash', action='store_true',
                         help='use hash table instead of NN')
     parser.add_argument('--sarsa', metavar='DECAY', type=int, default=0,
-                        help='use algo sarsa with decaying exploration rate')
+                        help='use algo sarsa with decaying exploration ratio (default=off)')
     parser.add_argument('--alpha', metavar='ALPHA', type=float, default=DEFAULT_ALPHA,
                         help='learning rate (default=%.3f)'%(DEFAULT_ALPHA))
     parser.add_argument('--epsilon', metavar='EPSILON', type=float, default=DEFAULT_EPSILON,
@@ -49,7 +49,7 @@ def main():
     EPISODES = args.episodes
     STEP     = args.step
     # algo
-    if args.sarsa:
+    if args.sarsa > 0:
         algo = algo_sarsa
     else:
         algo = algo_qlearning
@@ -95,7 +95,7 @@ def main():
                 # adjust learning rate with decay
                 alpha = args.alpha * args.decay / (args.decay+episodes+args.offset)
                 log.info('learning rate: %.3f', alpha)
-            if args.sarsa:
+            if args.sarsa > 0:
                 # sarsa: adjust exploration rate
                 epsilon = args.epsilon * args.sarsa / (args.sarsa+episodes+args.offset)
                 log.info('exploration rate: %.3f', epsilon)
