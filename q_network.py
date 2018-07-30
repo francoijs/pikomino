@@ -17,25 +17,27 @@ log = logging.getLogger('StrategyNetworkQ')
 
 class StrategyNetworkQ():
 
-    def __init__(self, fname, layers=3):
+    def __init__(self, fname, layers=3, width=0):
+        if not width:
+            width = INPUTS
         if fname.find('.h5') == -1:
-            fname = '%s-%dinputs-%dhidden.h5' % (fname, INPUTS, layers)
+            fname = '%s-%dinputs-%dhidden-%dwidth.h5' % (fname, INPUTS, layers, width)
         self.fname = fname
         if not os.path.isfile(self.fname):
-            self.model = self._new_model(layers)
+            self.model = self._new_model(layers, width)
         else:
             self.model = self._load_model(self.fname)
         # cache
         self._cache_state = None
         self._cache_q = None
 
-    def _new_model(self, layers):
+    def _new_model(self, layers, width):
         # Keras/TF
         log.info('creating new model %s', self.fname)
         model = Sequential()
         model.add(Dense(INPUTS, input_dim=INPUTS, activation='relu'))
         while layers>0:
-            model.add(Dense(INPUTS, activation='relu'))
+            model.add(Dense(width, activation='relu'))
             layers -= 1
         model.add(Dense(OUTPUTS, activation='linear'))
         model.compile(loss='mse', optimizer=Adam(lr=LEARNING_RATE))

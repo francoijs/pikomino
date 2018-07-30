@@ -36,14 +36,16 @@ def main():
                         help='use algo sarsa with decaying exploration ratio (default=off)')
     parser.add_argument('--alpha', metavar='ALPHA', type=float, default=DEFAULT_ALPHA,
                         help='learning rate (default=%.3f)'%(DEFAULT_ALPHA))
-    parser.add_argument('--epsilon', metavar='EPSILON', type=float, default=DEFAULT_EPSILON,
-                        help='exploration ratio (default=%.3f)'%(DEFAULT_EPSILON))
-    parser.add_argument('--layers', '-l', metavar='L', type=int, default=DEFAULT_LAYERS,
-                        help='number of hidden layers (default=%d)'%(DEFAULT_LAYERS))
     parser.add_argument('--decay', metavar='K', type=int, default=0,
                         help='learning rate decay (default=off)')
+    parser.add_argument('--epsilon', metavar='EPSILON', type=float, default=DEFAULT_EPSILON,
+                        help='exploration ratio (default=%.3f)'%(DEFAULT_EPSILON))
     parser.add_argument('--softmax', metavar='T', type=float, default=0,
                         help='use a softmax exploration strategy with temperature T (default=off)')
+    parser.add_argument('--layers', '-l', metavar='L', type=int, default=DEFAULT_LAYERS,
+                        help='number of hidden layers (default=%d)'%(DEFAULT_LAYERS))
+    parser.add_argument('--width', '-w', metavar='W', type=int, default=0,
+                        help='width of hidden layers (default=same as input layer)')
     parser.add_argument('--debug', '-d', action='store_true', default=False, 
                         help='display debug log')
     args = parser.parse_args()
@@ -65,7 +67,7 @@ def main():
         q = StrategyHashQ(DBNAME)
     else:
         from q_network import StrategyNetworkQ
-        q = StrategyNetworkQ(DBNAME, layers=args.layers)
+        q = StrategyNetworkQ(DBNAME, layers=args.layers, width=args.width)
     # counters
     won = episodes = rate = tot_score = mark = tot_mark = tot_null = tot_turns = tot_rounds = sum_td_error = 0
     time0 = time.time()
