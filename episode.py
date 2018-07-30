@@ -3,17 +3,23 @@ import numpy as np
 from state import State
 
 
-ALPHA = 0.3    # learning rate
-EPSILON = 0.1
+ALPHA       = 0.3    # learning rate
+EPSILON     = 0.1    # exploration ration
+TEMPERATURE = 0      # softmax temperature
 
 log = logging.getLogger('episode')
 
+# softmax stats
+sum_max_ps = 0
+count_ps = 0
 
-def s_setparams(alpha, epsilon, debug=False):
-    global ALPHA, EPSILON
+
+def setparams(alpha, epsilon, temperature, debug=False):
+    global ALPHA, EPSILON, TEMPERATURE
     ALPHA = alpha
     EPSILON = epsilon
-    log.debug('episode: alpha=%.1f / epsilon=%.1f', ALPHA, EPSILON)
+    TEMPERATURE = temperature
+    log.debug('episode: alpha=%.2f / epsilon=%.2f / temperature=%.2f', ALPHA, EPSILON, TEMPERATURE)
     if debug:
         log.setLevel(logging.DEBUG)
 
@@ -98,6 +104,8 @@ def episode(q_player, q_opponent=None, algo=algo_qlearning):
     my_turn = True
     # number of steal
     turns = rounds = steal = opp_top_tile = sum_td_error = 0
+    global count_ps, sum_max_ps
+    count_ps = sum_max_ps = 0
     while True:
         if my_turn:
             q = q_player
@@ -121,7 +129,7 @@ def episode(q_player, q_opponent=None, algo=algo_qlearning):
             state = state.change_turn()
             action = -1
             my_turn = not my_turn
-    return (state if my_turn else state.change_turn()), steal, turns, rounds, sum_td_error
+    return (state if my_turn else state.change_turn()), steal, turns, rounds, sum_td_error, float(sum_max_ps)/count_ps if count_ps else 0
 
 def policy(state, q):
     """
@@ -136,10 +144,31 @@ def policy(state, q):
         # no dice available -> this roll is lost
         return -1, [], np.empty((0,0))
     allQ = q.get_all(state.inputs())
-    if random.random() < EPSILON:
-        # exploration
+    if TEMPERATURE > 0:
+        # softmax distribution
+        ps = np.zeros(len(candidates))
+        idx = 0
+        for c in candidates:
+            ps[idx] = allQ[0,c]
+            idx += 1
+        action = np.random.choice(candidates, p=softmax(ps))
+    elif random.random() < EPSILON:
+        # e-greedy exploration
         action = random.choice(candidates)
     else:
-        # return best action
+        # exploitation: return best action
         action = candidates[ max(range(len(candidates)), key=lambda i: allQ[0,candidates[i]]) ]
     return action, candidates, allQ
+
+def softmax(q_vector):
+    """
+    Return a softmax distribution of the values in q_vector.
+    """
+    q_vector = np.exp(q_vector / TEMPERATURE)
+    q_vector /= np.sum(q_vector)
+    # fix normalization
+    q_vector[np.argmax(q_vector)] += 1-np.sum(q_vector)
+    global sum_max_ps, count_ps
+    sum_max_ps += max(q_vector)
+    count_ps += 1
+    return q_vector

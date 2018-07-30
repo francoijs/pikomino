@@ -2,15 +2,16 @@
 # pylint: disable=multiple-imports
 
 import time, signal, argparse, logging
-from episode import episode, s_setparams, algo_sarsa, algo_qlearning
+from episode import episode, setparams, algo_sarsa, algo_qlearning
 
 
 DBNAME = 'strategy'
-DEFAULT_EPISODES = 100000
-DEFAULT_STEP     = 1000
-DEFAULT_ALPHA    = .3
-DEFAULT_EPSILON  = .1
-DEFAULT_LAYERS   = 3
+DEFAULT_EPISODES    = 100000
+DEFAULT_STEP        = 1000
+DEFAULT_ALPHA       = .3
+DEFAULT_EPSILON     = .1
+DEFAULT_LAYERS      = 3
+DEFAULT_TEMPERATURE = 0
 running = True
 
 logging.basicConfig(
@@ -41,6 +42,8 @@ def main():
                         help='number of hidden layers (default=%d)'%(DEFAULT_LAYERS))
     parser.add_argument('--decay', metavar='K', type=int, default=0,
                         help='learning rate decay (default=off)')
+    parser.add_argument('--softmax', metavar='T', type=float, default=0,
+                        help='use a softmax exploration strategy with temperature T (default=off)')
     parser.add_argument('--debug', '-d', action='store_true', default=False, 
                         help='display debug log')
     args = parser.parse_args()
@@ -54,7 +57,7 @@ def main():
     else:
         algo = algo_qlearning
     # learning mode
-    s_setparams(args.alpha, args.epsilon, debug=args.debug)
+    setparams(args.alpha, args.epsilon, args.softmax, debug=args.debug)
     alpha = args.alpha
     epsilon = args.epsilon
     if args.hash:
@@ -67,7 +70,7 @@ def main():
     won = episodes = rate = tot_score = mark = tot_mark = tot_null = tot_turns = tot_rounds = sum_td_error = 0
     time0 = time.time()
     while running:
-        state,mark,turns,rounds,stde = episode(q, algo=algo)
+        state,mark,turns,rounds,stde,mmps = episode(q, algo=algo)
         if state.player_wins():
             won += 1
             tot_score += state.player_score()
@@ -87,8 +90,12 @@ def main():
                 avg_score = float(tot_score)/won
             else:
                 avg_score = 0
-            log.info('games: %d / won: %.1f%% of last %d / turns: %.1f/game / null: %.1f%% / avg score: %.1f / avg mark: %.1f%% / time: %.3fms/game / mean td error: %.3f',
-                     episodes, rate, STEP, float(tot_turns)/STEP, null_rate, avg_score, avg_mark, perf, float(sum_td_error)/tot_rounds)
+            log.info('games: %d / won: %.1f%% of last %d / turns: %.1f/game\n'
+                     'null: %.1f%% / avg score: %.1f / avg mark: %.1f%%\n'
+                     'time: %.2fms/game / mean td error: %.3f / mean softmax prob: %.2f',
+                     episodes, rate, STEP, float(tot_turns)/STEP,
+                     null_rate, avg_score, avg_mark,
+                     perf, float(sum_td_error)/tot_rounds, mmps)
             won = tot_null = tot_score = tot_mark = tot_turns = tot_rounds = sum_td_error = 0
             q.save(epoch=(episodes+args.offset))
             if args.decay:
@@ -99,7 +106,7 @@ def main():
                 # sarsa: adjust exploration rate
                 epsilon = args.epsilon * args.sarsa / (args.sarsa+episodes+args.offset)
                 log.info('exploration rate: %.3f', epsilon)
-            s_setparams(alpha, epsilon, debug=args.debug)
+            setparams(alpha, epsilon, args.softmax, debug=args.debug)
             time0 = time.time()
         if episodes == EPISODES:
             break    
