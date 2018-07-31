@@ -6,8 +6,8 @@ from episode import episode, setparams, algo_sarsa, algo_qlearning
 
 
 DBNAME = 'strategy'
-DEFAULT_EPISODES    = 100000
-DEFAULT_STEP        = 1000
+DEFAULT_EPISODES    = 10000
+DEFAULT_STEP        = 100
 DEFAULT_ALPHA       = .3
 DEFAULT_EPSILON     = .1
 DEFAULT_LAYERS      = 3
@@ -32,6 +32,8 @@ def main():
                         help='offset in count of episodes (default=0)')
     parser.add_argument('--hash', action='store_true',
                         help='use hash table instead of NN')
+    parser.add_argument('--base', '-b', metavar='DIR', type=str, default=None,
+                        help='base directory for models backup')
     parser.add_argument('--sarsa', metavar='DECAY', type=int, default=0,
                         help='use algo sarsa with decaying exploration ratio (default=off)')
     parser.add_argument('--alpha', metavar='ALPHA', type=float, default=DEFAULT_ALPHA,
@@ -50,6 +52,11 @@ def main():
                         help='display debug log')
     args = parser.parse_args()
     log.debug(args)
+    # base directory
+    if not args.base:
+        args.base = ''
+    elif args.base[-1] != '/':
+        args.base += '/'
     # params of training
     EPISODES = args.episodes
     STEP     = args.step
@@ -64,10 +71,10 @@ def main():
     epsilon = args.epsilon
     if args.hash:
         from q_hash import StrategyHashQ
-        q = StrategyHashQ(DBNAME)
+        q = StrategyHashQ(args.base+DBNAME)
     else:
         from q_network import StrategyNetworkQ
-        q = StrategyNetworkQ(DBNAME, layers=args.layers, width=args.width)
+        q = StrategyNetworkQ(args.base+DBNAME, layers=args.layers, width=args.width)
     # counters
     won = episodes = rate = tot_score = mark = tot_mark = tot_null = tot_turns = tot_rounds = sum_td_error = 0
     time0 = time.time()
