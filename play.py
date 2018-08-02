@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import sys, argparse, copy
-import episode
+import episode, algo
 from q_network import StrategyNetworkQ
 from state import State
 
@@ -19,7 +19,7 @@ def main(argv=sys.argv):
     args = parser.parse_args()
     print str(args)
     # playing mode
-    episode.s_setparams(0, 0, debug=True)
+    algo.set_params(0, 0, 0, debug=True)
     q = StrategyNetworkQ(DBNAME, layers=args.layers)
     # initial state
     ai_state = State()
@@ -45,7 +45,7 @@ def main(argv=sys.argv):
                     sys.exit()
                 except:
                     action = -1
-            my_state = my_state.transition(action)
+            my_state,_ = my_state.transition(action)
             if action>5:
                 break
         # print report for the round
@@ -59,8 +59,8 @@ def main(argv=sys.argv):
         ai_state = my_state.change_turn()
         while True:
             prev_state = copy.deepcopy(ai_state)
-            action,_,_ = episode.policy(ai_state, q)
-            ai_state = ai_state.transition(action)
+            action,_,_ = algo.policy(ai_state, q)
+            ai_state,_ = ai_state.transition(action)
             print 'transition:', prev_state, '--|%d|->' % (action), ai_state
             if ai_state.end_of_turn():
                 break
