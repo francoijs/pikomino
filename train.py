@@ -4,6 +4,7 @@
 import time, signal, argparse, logging
 from episode import episode
 from algo import set_params, algo_sarsa, algo_qlearning, get_stats, reset_stats
+from state import State
 
 
 DBNAME = 'strategy'
@@ -74,8 +75,8 @@ def main():
         from q_hash import StrategyHashQ
         q = StrategyHashQ(args.base+DBNAME)
     else:
-        from q_network import StrategyNetworkQ
-        q = StrategyNetworkQ(args.base+DBNAME, layers=args.layers, width=args.width)
+        from q_network import NetworkQ
+        q = NetworkQ(args.base+DBNAME, State, layers=args.layers, width=args.width)
     # counters
     won = episodes = rate = tot_score = mark = tot_mark = tot_null = tot_turns = tot_rounds = 0
     reset_stats()

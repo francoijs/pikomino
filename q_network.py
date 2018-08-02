@@ -9,19 +9,19 @@ import numpy as np
 
 
 LEARNING_RATE = 0.001
-INPUTS = State.INPUTS
 # 12 possibles actions: keep 1 of 6 sides and reroll or stop
 OUTPUTS = 12
-log = logging.getLogger('StrategyNetworkQ')
+log = logging.getLogger('network_q')
 
 
-class StrategyNetworkQ():
+class NetworkQ():
 
-    def __init__(self, fname, layers=3, width=0):
-        if not width:
-            width = INPUTS
+    def __init__(self, fname, State=None, layers=3, width=0):
+        self.State = State
         if fname.find('.h5') == -1:
-            fname = '%s-%dinputs-%dhidden-%dwidth.h5' % (fname, INPUTS, layers, width)
+            if not width:
+                width = self.State.INPUTS
+            fname = '%s-%dinputs-%dhidden-%dwidth.h5' % (fname, State.INPUTS, layers, width)
         self.fname = fname
         if not os.path.isfile(self.fname):
             self.model = self._new_model(layers, width)
@@ -35,11 +35,11 @@ class StrategyNetworkQ():
         # Keras/TF
         log.info('creating new model %s', self.fname)
         model = Sequential()
-        model.add(Dense(INPUTS, input_dim=INPUTS, activation='relu'))
+        model.add(Dense(self.State.INPUTS, input_dim=self.State.INPUTS, activation='relu'))
         while layers>0:
             model.add(Dense(width, activation='relu'))
             layers -= 1
-        model.add(Dense(OUTPUTS, activation='linear'))
+        model.add(Dense(self.State.OUTPUTS, activation='linear'))
         model.compile(loss='mse', optimizer=Adam(lr=LEARNING_RATE))
         return model
 

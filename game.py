@@ -34,10 +34,10 @@ def main():
     set_params(0, 0, 0, debug=args.debug)
 
     # load DQN
-    from q_network import StrategyNetworkQ
-    q1 = StrategyNetworkQ(args.model1)
+    from q_network import NetworkQ
+    q1 = NetworkQ(args.model1)
     if args.model2:
-        q2 = StrategyNetworkQ(args.model2)
+        q2 = NetworkQ(args.model2)
     else:
         q2 = q1
 
