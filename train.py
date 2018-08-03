@@ -4,7 +4,7 @@
 import time, signal, argparse, logging
 import episode
 import state as piko_state
-from algo import set_params, algo_sarsa, algo_qlearning, get_stats, reset_stats
+from algo import set_params, algo_sarsa, algo_qlearning, algo_play, get_stats, reset_stats
 
 
 DEFAULT_EPISODES    = 10000
@@ -36,6 +36,8 @@ def train(parser, Episode, State):
                         help='total number of episodes (default=%d)'%(DEFAULT_EPISODES))
     parser.add_argument('--step', '-s', metavar='S', type=int, default=DEFAULT_STEP,
                         help='number of episodes per step (default=%d)'%(DEFAULT_STEP))
+    parser.add_argument('--validation', '-v', metavar='V', type=int, default=0,
+                        help='number of validation episodes run at each step (default=0)')
     parser.add_argument('--offset', metavar='O', type=int, default=0,
                         help='offset in count of episodes (default=0)')
     parser.add_argument('--hash', action='store_true',
@@ -84,29 +86,49 @@ def train(parser, Episode, State):
         from q_network import NetworkQ
         q = NetworkQ(args.base+Episode.dbname, State, layers=args.layers, width=args.width)
     # counters
-    won = episodes = rate = tot_turns = tot_rounds = 0
+    won = episodes = tot_turns = tot_backups = 0
     reset_stats()
     Episode.reset_stats()
     time0 = time.time()
     while running:
-        state,turns,rounds = Episode.episode(q, algo=algo)
-        if state.player_wins():
-            won += 1
+        state,turns,backups = Episode.episode(q, algo=algo)
         episodes += 1
-        tot_turns += turns
-        tot_rounds += rounds
+        if not args.validation:
+            # no validation: update stats during training
+            if state.player_wins():
+                won += 1
+            tot_turns += turns
+            tot_backups += backups
         if not episodes % STEP:
-            perf = (time.time() - time0) * float(1000) / STEP
-            rate = 100 * float(won)/STEP
-            # RL stats
-            mean_td_error, mean_ps = get_stats()
-            log.info('games: %d / won: %.1f%% of last %d / turns: %.1f/episode\n'
+            mean_duration = (time.time() - time0) * float(1000) / STEP
+            if args.validation == 0:
+                stats_step = STEP
+            else:
+                stats_step = args.validation
+                # run some validation episodes
+                won = tot_turns = tot_backups = 0
+                Episode.reset_stats()
+                # disable training
+                set_params(0, 0, 0, debug=args.debug)
+                for _ in range(stats_step):
+                    state,turns,backups = Episode.episode(q, algo=algo_play)
+                    if state.player_wins():
+                        won += 1
+                    tot_turns += turns
+                    tot_backups += backups
+                # restore training settings
+                set_params(alpha, epsilon, args.softmax, debug=args.debug)
+            # report stats
+            rate = 100 * float(won)/stats_step
+            mean_td_error, mean_max_softmax = get_stats()
+            log.info('games: %d / won: %.1f%% of %d / avg turns: %.1f / avg backups: %.1f\n'
                      'time: %.2fms/episode / mean td error: %.3f / mean softmax prob: %.2f\n'
                      '%s',
-                     episodes, rate, STEP, float(tot_turns)/STEP,
-                     perf, mean_td_error, mean_ps,
+                     episodes, rate, stats_step,
+                     float(tot_turns)/stats_step,  float(tot_backups)/stats_step,
+                     mean_duration, mean_td_error, mean_max_softmax,
                      Episode.print_stats())
-            won = tot_turns = tot_rounds = 0
+            won = tot_turns = tot_backups = 0
             reset_stats()
             Episode.reset_stats()
             q.save(epoch=(episodes+args.offset))

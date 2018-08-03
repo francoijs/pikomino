@@ -24,7 +24,7 @@ class State():
     def __init__(self):
         self.dices = [0,0,0,0,0,0]
         self.roll  = _roll(8)
-        self._end = False
+        self._end = self._won = False
 
     def __repr__(self):
         return '('+str(self.dices)+','+str(self.roll)+')'
@@ -33,7 +33,7 @@ class State():
         return self._end
 
     def player_wins(self):
-        return self.dices[0] and self.total()>20
+        return self._won
     def player_score(self):
         return self.total()
     
@@ -63,6 +63,7 @@ class State():
         if action == -1:
             # roll is lost
             self._end = True
+            self._won = False
             return self, -1
         if action<6:
             # keep some dices then reroll
@@ -73,6 +74,7 @@ class State():
             # keep som dices then stop
             self.transition(action-6)
             self._end = True
+            self._won = True
             # normalize reward between 0 and 1
             return self, float(self.total()-20)/16
 
