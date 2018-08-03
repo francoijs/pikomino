@@ -4,7 +4,6 @@ import os, logging
 from keras.models import Sequential, load_model
 from keras.layers import Dense
 from keras.optimizers import Adam
-from state import State
 import numpy as np
 
 
@@ -19,9 +18,9 @@ class NetworkQ():
     def __init__(self, fname, State=None, layers=3, width=0):
         self.State = State
         if fname.find('.h5') == -1:
-            if not width:
+            if width == 0:
                 width = self.State.INPUTS
-            fname = '%s-%dinputs-%dhidden-%dwidth.h5' % (fname, State.INPUTS, layers, width)
+            fname = '%s-inputs%d-hidden%d-width%d.h5' % (fname, State.INPUTS, layers, width)
         self.fname = fname
         if not os.path.isfile(self.fname):
             self.model = self._new_model(layers, width)

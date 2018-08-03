@@ -18,17 +18,18 @@ def set_params(alpha, epsilon, temperature, debug=False):
         log.setLevel(logging.DEBUG)
 
 # stats
-sum_max_ps = 0
-count_ps = 0
+sum_max_softmax = 0
+count_softmax = 0
 sum_td_error = 0
+count_td_error = 0
 
 def get_stats():
-    global sum_max_ps, count_ps, sum_td_error
-    return sum_td_error, float(sum_max_ps)/count_ps if count_ps else 0
+    global sum_max_softmax, count_softmax, sum_td_error, count_td_error
+    return float(sum_td_error)/count_td_error if count_td_error else 0, float(sum_max_softmax)/count_softmax if count_softmax else 0
 
 def reset_stats():
-    global sum_max_ps, count_ps, sum_td_error
-    sum_td_error = count_ps = sum_max_ps = 0
+    global sum_max_softmax, count_softmax, sum_td_error, count_td_error
+    sum_max_softmax = count_softmax = sum_td_error = count_td_error = 0
 
 def algo_qlearning(q, state, action):
     state0 = copy.deepcopy(state)
@@ -56,8 +57,9 @@ def algo_qlearning(q, state, action):
         q.set(state0.inputs(), action, new, allq0)
     else:
         tde = 0
-    global sum_td_error
+    global sum_td_error, count_td_error
     sum_td_error += math.fabs(tde)
+    count_td_error += 1
     # log transition
     log.debug('transition: %s --|%d|-> %s', state0, action, state)
     return state, -1
@@ -90,8 +92,9 @@ def algo_sarsa(q, state, action):
         q.set(state0.inputs(), action, new, allq0)
     else:
         tde = 0
-    global sum_td_error
+    global sum_td_error, count_td_error
     sum_td_error += math.fabs(tde)
+    count_td_error += 1
     # log transition
     log.debug('transition: %s --|%d|-> %s', state0, action, state)
     return state, action1
@@ -141,7 +144,7 @@ def softmax(q_vector):
     q_vector /= np.sum(q_vector)
     # fix normalization
     q_vector[np.argmax(q_vector)] += 1-np.sum(q_vector)
-    global sum_max_ps, count_ps
-    sum_max_ps += max(q_vector)
-    count_ps += 1
+    global sum_max_softmax, count_softmax
+    sum_max_softmax += max(q_vector)
+    count_softmax += 1
     return q_vector

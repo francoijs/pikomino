@@ -1,12 +1,12 @@
 #!/usr/bin/python
 
 import sys, argparse, copy
-import episode, algo
+import algo
 from q_network import NetworkQ
 from state import State
 
 
-DBNAME = 'strategy'
+DBNAME = 'piko'
 DEFAULT_LAYERS = 3
 
 def main(argv=sys.argv):
@@ -20,7 +20,7 @@ def main(argv=sys.argv):
     print str(args)
     # playing mode
     algo.set_params(0, 0, 0, debug=True)
-    q = NetworkQ(DBNAME, State, layers=args.layers)
+    q = NetworkQ(DBNAME, State=State, layers=args.layers)
     # initial state
     ai_state = State()
     # start game

@@ -2,12 +2,11 @@
 # pylint: disable=multiple-imports
 
 import time, signal, argparse, logging
-from episode import episode
+import episode
+import state as piko_state
 from algo import set_params, algo_sarsa, algo_qlearning, get_stats, reset_stats
-from state import State
 
 
-DBNAME = 'strategy'
 DEFAULT_EPISODES    = 10000
 DEFAULT_STEP        = 100
 DEFAULT_ALPHA       = .3
@@ -23,9 +22,16 @@ logging.basicConfig(
 log = logging.getLogger('main')
 
 
-def main():
+def stop(_signum, _frame):
+    log.info('stopping...')
+    global running
+    running = False
+
+def train(parser, Episode, State):
+    # sigterm
+    signal.signal(signal.SIGINT, stop)
+    signal.signal(signal.SIGTERM, stop)
     # parse args
-    parser = argparse.ArgumentParser(description='Train the strategy.')
     parser.add_argument('--episodes', '-e', metavar='N', type=int, default=DEFAULT_EPISODES,
                         help='total number of episodes (default=%d)'%(DEFAULT_EPISODES))
     parser.add_argument('--step', '-s', metavar='S', type=int, default=DEFAULT_STEP,
@@ -73,44 +79,36 @@ def main():
     epsilon = args.epsilon
     if args.hash:
         from q_hash import StrategyHashQ
-        q = StrategyHashQ(args.base+DBNAME)
+        q = StrategyHashQ(args.base+Episode.dbname)
     else:
         from q_network import NetworkQ
-        q = NetworkQ(args.base+DBNAME, State, layers=args.layers, width=args.width)
+        q = NetworkQ(args.base+Episode.dbname, State, layers=args.layers, width=args.width)
     # counters
-    won = episodes = rate = tot_score = mark = tot_mark = tot_null = tot_turns = tot_rounds = 0
+    won = episodes = rate = tot_turns = tot_rounds = 0
     reset_stats()
+    Episode.reset_stats()
     time0 = time.time()
     while running:
-        state,mark,turns,rounds = episode(q, algo=algo)
+        state,turns,rounds = Episode.episode(q, algo=algo)
         if state.player_wins():
             won += 1
-            tot_score += state.player_score()
         episodes += 1
-        tot_mark += mark
         tot_turns += turns
         tot_rounds += rounds
-        if state.player_score()==0:
-            tot_null += 1
         if not episodes % STEP:
             perf = (time.time() - time0) * float(1000) / STEP
             rate = 100 * float(won)/STEP
-            null_rate = 100 * float(tot_null)/STEP
-            avg_mark = float(tot_mark)/STEP
-            if won:
-                avg_score = float(tot_score)/won
-            else:
-                avg_score = 0
             # RL stats
-            sum_td_error, mean_ps = get_stats()
-            log.info('games: %d / won: %.1f%% of last %d / turns: %.1f/game\n'
-                     'null: %.1f%% / avg score: %.1f / avg mark: %.1f%%\n'
-                     'time: %.2fms/game / mean td error: %.3f / mean softmax prob: %.2f',
+            mean_td_error, mean_ps = get_stats()
+            log.info('games: %d / won: %.1f%% of last %d / turns: %.1f/episode\n'
+                     'time: %.2fms/episode / mean td error: %.3f / mean softmax prob: %.2f\n'
+                     '%s',
                      episodes, rate, STEP, float(tot_turns)/STEP,
-                     null_rate, avg_score, avg_mark,
-                     perf, float(sum_td_error)/tot_rounds, mean_ps)
-            won = tot_null = tot_score = tot_mark = tot_turns = tot_rounds = 0
+                     perf, mean_td_error, mean_ps,
+                     Episode.print_stats())
+            won = tot_turns = tot_rounds = 0
             reset_stats()
+            Episode.reset_stats()
             q.save(epoch=(episodes+args.offset))
             if args.decay:
                 # adjust learning rate with decay
@@ -126,13 +124,6 @@ def main():
             break    
     q.save()
 
-def stop(_signum, _frame):
-    log.info('stopping...')
-    global running
-    running = False
     
 if __name__ == "__main__":
-    # sigterm
-    signal.signal(signal.SIGINT, stop)
-    signal.signal(signal.SIGTERM, stop)
-    main()
+    train(argparse.ArgumentParser(description='Train the strategy.'), episode.EpisodePiko, piko_state.State)
