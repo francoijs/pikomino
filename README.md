@@ -9,12 +9,13 @@ keras, numpy
     $ ./play.py best_strategy.h5
 
 You play first.
-Example of turn:
+
+__Example of turn:__
 
     state: ([23, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35],[22],[25, 21, 24],[3, 0, 0, 0, 2, 0],[0, 0, 0, 1, 2, 0]) / total: 23
     choose action [3, 9]: 
 
-__Content of state:
+__Content of state:__
 - the 1st array is the available tiles (the stash),
 - the 2nd array [22] is the tiles taken by the opponent (in that order),
 - the 3rd array [25, 21, 24] is the tiles you already won (in that order),
@@ -35,4 +36,4 @@ __Actions:__
 Trains for 5000 episodes (5000 games of 2 players, the model plays both players).
 Every 500 episodes, the model is evaluated and saved.
 The model will have 4 hidden layers of 103 cells. 103 is the width of the input layer (which represents the encoded state), and the default size of hidden layers.
-The output layer always has 12 cells (which represents the q-values for each 12 actions).
+The output layer always has 12 cells (which represent the q-values for each 12 actions).
