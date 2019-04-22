@@ -6,21 +6,17 @@ from q_network import NetworkQ
 from state import State
 
 
-DBNAME = 'piko'
-DEFAULT_LAYERS = 3
 
 def main(argv=sys.argv):
     # parse args
     parser = argparse.ArgumentParser(description='Play a game.')
-    parser.add_argument('--hash', action='store_true',
-                        help='use hash table instead of NN')
-    parser.add_argument('--layers', '-l', metavar='L', type=int, default=DEFAULT_LAYERS,
-                        help='number of hidden layers (default=%d)'%(DEFAULT_LAYERS))
+    parser.add_argument('model', metavar='MODEL', type=str,
+                        help='model file')
     args = parser.parse_args()
     print str(args)
     # playing mode
     algo.set_params(0, 0, 0, debug=True)
-    q = NetworkQ(DBNAME, State=State, layers=args.layers)
+    q = NetworkQ(args.model, State=State)
     # initial state
     ai_state = State()
     # start game
