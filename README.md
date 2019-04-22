@@ -33,7 +33,7 @@ __Actions:__
 
     $ ./train.py  -e 5000 -s 500 -l4
 
-Trains for 5000 episodes (5000 games of 2 players, the model plays both players).
-Every 500 episodes, the model is evaluated and saved.
-The model will have 4 hidden layers of 103 cells. 103 is the width of the input layer (which represents the encoded state), and the default size of hidden layers.
-The output layer always has 12 cells (which represent the q-values for each 12 actions).
+Trains for 5000 episodes (5000 games of 2 players, the model plays both players).  
+Every 500 episodes, the model is evaluated and saved.  
+The model will have 4 hidden layers of 103 cells. 103 is the width of the input layer (which represents the encoded state), and the default size of hidden layers.  
+The output layer always has 12 cells (which represent the q-values for each 12 actions).  
