@@ -154,7 +154,7 @@ class State(object):
     # int: possible score delta [-40,40]
     # 2 sets: dices kept + dices rolled
     # per set: 6 sides * [0-8] count of dices per side
-    INPUTS = 16+16+16+81+2*6*9   # 103
+    INPUTS = 16+16+16+81+2*6*9   # 237
     # 12 possibles actions: keep 1 of 6 sides and reroll or stop
     OUTPUTS = 12
 
