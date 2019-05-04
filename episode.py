@@ -14,6 +14,7 @@ class EpisodePiko():
 
     @staticmethod
     def reset_stats():
+        global tot_rounds, tot_turns, tot_mark, tot_score, tot_null, won, episodes
         tot_rounds = tot_turns = tot_mark = tot_score = tot_null = won = episodes = 0
 
     @staticmethod

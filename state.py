@@ -150,8 +150,8 @@ class State(object):
     
     # ohv: 16 possible tiles in stash
     # ohv: 16 possible top opponent tiles [21,36]
-    # ovh: 16 possible top mine tiles [21,36]
-    # int: possible score delta [-40,40]
+    # ohv: 16 possible top mine tiles [21,36]
+    # ohv: possible score delta [-40,40]
     # 2 sets: dices kept + dices rolled
     # per set: 6 sides * [0-8] count of dices per side
     INPUTS = 16+16+16+81+2*6*9   # 237
