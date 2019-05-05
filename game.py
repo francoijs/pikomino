@@ -13,38 +13,11 @@ logging.basicConfig(
 log = logging.getLogger('main')
 running = True
 
-
-def main():
-    # parse args
-    parser = argparse.ArgumentParser(description='Play matches between 2 models.')
-    parser.add_argument('model1', metavar='MODEL_1', type=str,
-                        help='model file 1')
-    parser.add_argument('model2', metavar='MODEL_2', type=str, nargs='?',
-                        help='model file 2 (default=same as model 1)')
-    parser.add_argument('--games', '-g', metavar='G', type=int, default=DEFAULT_GAMES,
-                        help='number of games (default=%d)'%(DEFAULT_GAMES))
-    parser.add_argument('--debug', '-d', action='store_true', default=False, 
-                        help='display debug log')
-    args = parser.parse_args()
-    if args.debug:
-        log.setLevel(logging.DEBUG)
-    log.debug(args)
-    
-    # playing mode
-    set_params(0, 0, 0, debug=args.debug)
-
-    # load DQN
-    from q_network import NetworkQ
-    q1 = NetworkQ(args.model1)
-    if args.model2:
-        q2 = NetworkQ(args.model2)
-    else:
-        q2 = q1
-
+def match(q1, q2, games):
     # game on
     log.info('playing <%s> against <%s>...', q1.fname, 'itself' if q1==q2 else q2.fname)
     wins_left = wins_right = draws = played = 0
-    for game in range(args.games):
+    for game in range(games):
         state,_,rounds = EpisodePiko.episode(q1, q2, algo=algo_play)
         log.info('game %d: rounds=%3d, winner=%s, score=%d/%d',
                  game, rounds,
@@ -65,6 +38,41 @@ def main():
              wins_right*100/played,
              draws*100/played
     )
+    return 1 if wins_left > wins_right else -1
+    
+def main():
+    # parse args
+    parser = argparse.ArgumentParser(description='Play matches to determine the best model between N.')
+    parser.add_argument('models', metavar='MODEL', type=str, nargs='+',
+                        help='model files (at least 2)')
+    parser.add_argument('--games', '-g', metavar='G', type=int, default=DEFAULT_GAMES,
+                        help='number of games to play between 2 models(default=%d)'%(DEFAULT_GAMES))
+    parser.add_argument('--debug', '-d', action='store_true', default=False, 
+                        help='display debug log')
+    args = parser.parse_args()
+    if args.debug:
+        log.setLevel(logging.DEBUG)
+    log.debug(args)
+    
+    # playing mode
+    set_params(0, 0, 0, debug=args.debug)
+
+    # match models against each other
+    Q = {}
+    def compare(f1, f2):
+        from q_network import NetworkQ
+        if f1 not in Q:
+            Q[f1] = NetworkQ(f1)
+        if f2 not in Q:
+            Q[f2] = NetworkQ(f2)
+        return match(Q[f1], Q[f2], args.games)
+    best = args.models[0]
+    for key in args.models[1:]:
+        if not running:
+            break
+        if compare(best, key) < 0:
+            best = key
+    log.info('winner is %s', best)
 
 def stop(_signum, _frame):
     log.info('stopping...')

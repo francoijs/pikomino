@@ -26,6 +26,8 @@ class NetworkQ():
             self.model = self._new_model(layers, width)
         else:
             self.model = self._load_model(self.fname)
+        for layer in self.model.layers:
+            log.info('layer %s: %d / %s', layer.name, layer.units, layer.activation.__name__)
         # cache
         self._cache_state = None
         self._cache_q = None
