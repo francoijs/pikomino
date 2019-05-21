@@ -46,7 +46,7 @@ def main():
     parser.add_argument('models', metavar='MODEL', type=str, nargs='+',
                         help='model files (at least 2)')
     parser.add_argument('--games', '-g', metavar='G', type=int, default=DEFAULT_GAMES,
-                        help='number of games to play between 2 models(default=%d)'%(DEFAULT_GAMES))
+                        help='number of games to play between 2 models (default=%d)'%(DEFAULT_GAMES))
     parser.add_argument('--debug', '-d', action='store_true', default=False, 
                         help='display debug log')
     args = parser.parse_args()

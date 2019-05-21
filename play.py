@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys, argparse, copy
+import sys, argparse, copy, random
 import algo
 from q_network import NetworkQ
 from state import State
@@ -18,37 +18,48 @@ def main(argv=sys.argv):
     algo.set_params(0, 0, 0, debug=True)
     q = NetworkQ(args.model, State=State)
     # initial state
-    ai_state = State()
+    my_state = ai_state = State()
+
+    # who starts?
+    human_starts = random.choice([True, False])
+    if human_starts:
+        print 'you begin'
+    else:
+        print 'AI begins'
+    
     # start game
     while True:
 
-        # my turn
-        print 'your turn:'
-        my_state = ai_state.change_turn()
-        while True:
-            prev_state = copy.deepcopy(my_state)
-            print 'state: %s / total: %d' % (my_state, my_state.total())
-            candidates = my_state.find_candidates()
-            if not candidates:
-                # update state
-                my_state.lose_tile()
-                break
-            action = -1
-            while action not in candidates:
-                try:
-                    action = input('choose action %s: ' % (candidates))
-                except KeyboardInterrupt:
-                    sys.exit()
-                except:
-                    action = -1
-            my_state,_ = my_state.transition(action)
-            if action>5:
-                break
-        # print report for the round
-        report('you', my_state.player, prev_state)
-        if not my_state.stash:
-            end_game(my_state)
-            return 0
+        if human_starts:
+            # my turn
+            print 'your turn:'
+            my_state = ai_state.change_turn()
+            while True:
+                prev_state = copy.deepcopy(my_state)
+                print 'state: %s / total: %d' % (my_state, my_state.total())
+                candidates = my_state.find_candidates()
+                if not candidates:
+                    # update state
+                    my_state.lose_tile()
+                    break
+                action = -1
+                while action not in candidates:
+                    try:
+                        action = input('choose action %s: ' % (candidates))
+                    except KeyboardInterrupt:
+                        sys.exit()
+                    except:
+                        action = -1
+                my_state,_ = my_state.transition(action)
+                if action>5:
+                    break
+            # print report for the round
+            report('you', my_state.player, prev_state)
+            if not my_state.stash:
+                end_game(my_state)
+                return 0
+        else:
+            human_starts = True    
 
         # AI turn
         print 'AI turn:'
