@@ -31,11 +31,11 @@ class EpisodePiko():
         )
 
     @staticmethod
-    def episode(q_player, q_opponent=None, algo=algo_qlearning):
+    def episode(pol_player, pol_opponent=None, algo=algo_qlearning):
         """ Run an episode and return final state. """
-        # DQN of opponent
-        if not q_opponent:
-            q_opponent = q_player
+        # policy of opponent
+        if not pol_opponent:
+            pol_opponent = pol_player
         # initial state & action
         state = State()
         action = -1
@@ -44,10 +44,10 @@ class EpisodePiko():
         turns = rounds = steal = opp_top_tile = 0
         while True:
             if my_turn:
-                q = q_player
+                policy = pol_player
             else:
-                q = q_opponent
-            state,action = algo(q, state, action)
+                policy = pol_opponent
+            state,action = algo(policy, state, action)
             rounds += 1
             if state.end_of_game():
                 # game is over

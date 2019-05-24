@@ -4,7 +4,7 @@ import sys, argparse, copy, random
 import algo
 from q_network import NetworkQ
 from state import State
-
+from policy import Policy
 
 
 def main(argv=sys.argv):
@@ -15,8 +15,9 @@ def main(argv=sys.argv):
     args = parser.parse_args()
     print str(args)
     # playing mode
-    algo.set_params(0, 0, 0, debug=True)
+    algo.set_params(0, debug=True)
     q = NetworkQ(args.model, State=State)
+    policy = Policy.create('exploit', q)
     # initial state
     my_state = ai_state = State()
 
@@ -66,7 +67,7 @@ def main(argv=sys.argv):
         ai_state = my_state.change_turn()
         while True:
             prev_state = copy.deepcopy(ai_state)
-            action,_,_ = algo.policy(ai_state, q)
+            action,_,_ = policy.play(ai_state)
             ai_state,_ = ai_state.transition(action)
             print 'transition:', prev_state, '--|%d|->' % (action), ai_state
             if ai_state.end_of_turn():

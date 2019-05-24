@@ -5,6 +5,7 @@ import time, signal, argparse, logging
 import episode
 import state as piko_state
 from algo import set_params, algo_sarsa, algo_qlearning, algo_play, get_stats, reset_stats
+from policy import Policy
 
 
 DEFAULT_EPISODES    = 10000
@@ -75,23 +76,31 @@ def train(parser, Episode, State):
         algo = algo_sarsa
     else:
         algo = algo_qlearning
-    # learning mode
-    set_params(args.alpha, args.epsilon, args.softmax, debug=args.debug)
-    alpha = args.alpha
-    epsilon = args.epsilon
+    # q-store
     if args.hash:
         from q_hash import StrategyHashQ
         q = StrategyHashQ(args.base+Episode.dbname)
     else:
         from q_network import NetworkQ
         q = NetworkQ(args.base+Episode.dbname, State, layers=args.layers, width=args.width)
+    # policy
+    if args.softmax > 0:
+        policy = Policy.create('softmax', q)
+    else:
+        policy = Policy.create('egreedy', q)
+    # learning mode
+    set_params(args.alpha, debug=args.debug)
+    policy.set_params(args.epsilon, args.softmax)
+    alpha = args.alpha
+    epsilon = args.epsilon
     # counters
     won = episodes = tot_turns = tot_backups = 0
     reset_stats()
     Episode.reset_stats()
+    policy.reset_stats()
     time0 = time.time()
     while running:
-        state,turns,backups = Episode.episode(q, algo=algo)
+        state,turns,backups = Episode.episode(policy, algo=algo)
         episodes += 1
         if not args.validation:
             # no validation: update stats during training
@@ -109,18 +118,21 @@ def train(parser, Episode, State):
                 won = tot_turns = tot_backups = 0
                 Episode.reset_stats()
                 # disable training
-                set_params(0, 0, 0, debug=args.debug)
+                set_params(0, debug=args.debug)
+                policy.set_params(0, 0)
                 for _ in range(stats_step):
-                    state,turns,backups = Episode.episode(q, algo=algo_play)
+                    state,turns,backups = Episode.episode(policy, algo=algo_play)
                     if state.player_wins():
                         won += 1
                     tot_turns += turns
                     tot_backups += backups
                 # restore training settings
-                set_params(alpha, epsilon, args.softmax, debug=args.debug)
+                set_params(alpha, debug=args.debug)
+                policy.set_params(epsilon, args.softmax)
             # report stats
             rate = 100 * float(won)/stats_step
-            mean_td_error, mean_max_softmax = get_stats()
+            mean_td_error  = get_stats()
+            mean_max_softmax = policy.get_stats()
             log.info('games: %d / won: %.1f%% of %d / avg turns: %.1f / avg backups: %.1f\n'
                      'time: %.2fms/episode / mean td error: %.3f / mean softmax prob: %.2f\n'
                      '%s',
@@ -131,6 +143,7 @@ def train(parser, Episode, State):
             won = tot_turns = tot_backups = 0
             reset_stats()
             Episode.reset_stats()
+            policy.reset_stats()            
             q.save(epoch=(episodes+args.offset))
             if args.decay:
                 # adjust learning rate with decay
@@ -140,7 +153,8 @@ def train(parser, Episode, State):
                 # sarsa: adjust exploration rate
                 epsilon = args.epsilon * args.sarsa / (args.sarsa+episodes+args.offset)
                 log.info('exploration rate: %.3f', epsilon)
-            set_params(alpha, epsilon, args.softmax, debug=args.debug)
+            policy.set_params(epsilon, args.softmax)
+            set_params(alpha, debug=args.debug)
             time0 = time.time()
         if episodes == EPISODES:
             break    

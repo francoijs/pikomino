@@ -3,6 +3,7 @@
 import logging, argparse, signal
 from episode import EpisodePiko
 from algo import set_params, algo_play
+from policy import PolicyExploit
 
 
 DEFAULT_GAMES=1
@@ -13,12 +14,12 @@ logging.basicConfig(
 log = logging.getLogger('main')
 running = True
 
-def match(q1, q2, games):
+def match(p1, p2, games):
     # game on
-    log.info('playing <%s> against <%s>...', q1.fname, 'itself' if q1==q2 else q2.fname)
+    log.info('playing <%s> against <%s>...', p1.q.fname, 'itself' if p1==p2 else p2.q.fname)
     wins_left = wins_right = draws = played = 0
     for game in range(games):
-        state,_,rounds = EpisodePiko.episode(q1, q2, algo=algo_play)
+        state,_,rounds = EpisodePiko.episode(p1, p2, algo=algo_play)
         log.info('game %d: rounds=%3d, winner=%s, score=%d/%d',
                  game, rounds,
                  'left' if state.player_wins() else 'right' if state.opponent_wins() else 'draw',
@@ -51,11 +52,11 @@ def main():
                         help='display debug log')
     args = parser.parse_args()
     if args.debug:
-        log.setLevel(logging.DEBUG)
+        logging.getLogger().setLevel(logging.DEBUG)
     log.debug(args)
     
     # playing mode
-    set_params(0, 0, 0, debug=args.debug)
+    set_params(0, debug=args.debug)
 
     # match models against each other
     Q = {}
@@ -65,7 +66,7 @@ def main():
             Q[f1] = NetworkQ(f1)
         if f2 not in Q:
             Q[f2] = NetworkQ(f2)
-        return match(Q[f1], Q[f2], args.games)
+        return match(PolicyExploit(Q[f1]), PolicyExploit(Q[f2]), args.games)
     best = args.models[0]
     for key in args.models[1:]:
         if not running:

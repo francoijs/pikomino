@@ -1,39 +1,36 @@
 import copy, logging, random, math
 import numpy as np
+from policy import PolicyEGreedy, PolicySoftmax
 
 
 log = logging.getLogger('algo')
 
+# TODO: move to new static class AlgoQLearning
 ALPHA       = 0.3    # learning rate
-EPSILON     = 0.1    # exploration ratio
-TEMPERATURE = 0      # softmax temperature
 
-def set_params(alpha, epsilon, temperature, debug=False):
-    global ALPHA, EPSILON, TEMPERATURE
+def set_params(alpha, debug=False):
+    global ALPHA
     ALPHA = alpha
-    EPSILON = epsilon
-    TEMPERATURE = temperature
-    log.debug('episode: alpha=%.2f / epsilon=%.2f / temperature=%.2f', ALPHA, EPSILON, TEMPERATURE)
+    log.debug('algo: alpha=%.2f', ALPHA)
     if debug:
         log.setLevel(logging.DEBUG)
 
 # stats
-sum_max_softmax = 0
-count_softmax = 0
+# TODO: move to new static class AlgoQLearning
 sum_td_error = 0
 count_td_error = 0
 
 def get_stats():
-    global sum_max_softmax, count_softmax, sum_td_error, count_td_error
-    return float(sum_td_error)/count_td_error if count_td_error else 0, float(sum_max_softmax)/count_softmax if count_softmax else 0
+    global sum_td_error, count_td_error
+    return float(sum_td_error)/count_td_error if count_td_error else 0
 
 def reset_stats():
-    global sum_max_softmax, count_softmax, sum_td_error, count_td_error
-    sum_max_softmax = count_softmax = sum_td_error = count_td_error = 0
+    global sum_td_error, count_td_error
+    sum_td_error = count_td_error = 0
 
-def algo_qlearning(q, state, action):
+def algo_qlearning(policy, state, action):
     state0 = copy.deepcopy(state)
-    action0,candidates,allq0 = policy(state, q)
+    action0,candidates,allq0 = policy.play(state)
     if action == -1:
         action = action0
     state,reward = state.transition(action)
@@ -45,7 +42,7 @@ def algo_qlearning(q, state, action):
         # game not over
         # no need to compute qsa if alpha=0 (no training)
         if ALPHA and candidates:
-            allq = q.get_all(state.inputs())
+            allq = policy.q.get_all(state.inputs())
             qsa = max([allq[0,a] for a in candidates])
         else:
             qsa = 0
@@ -54,7 +51,7 @@ def algo_qlearning(q, state, action):
         old = allq0[0,action]
         tde = reward + qsa - old
         new = old + ALPHA * tde
-        q.set(state0.inputs(), action, new, allq0)
+        policy.q.set(state0.inputs(), action, new, allq0)
     else:
         tde = 0
     global sum_td_error, count_td_error
@@ -64,9 +61,9 @@ def algo_qlearning(q, state, action):
     log.debug('transition: %s --|%d|-> %s', state0, action, state)
     return state, -1
 
-def algo_sarsa(q, state, action):
+def algo_sarsa(policy, state, action):
     state0 = copy.deepcopy(state)
-    action0,candidates,allq0 = policy(state, q)
+    action0,candidates,allq0 = policy.play(state)
     if action == -1:
         action = action0
     state,reward = state.transition(action)
@@ -79,7 +76,7 @@ def algo_sarsa(q, state, action):
         # game not over
         # no need to compute qsa if alpha=0 (no training)
         if ALPHA and candidates:
-            action1,_,allq1 = policy(state, q)
+            action1,_,allq1 = policy.play(state)
         if action1<0:
             qsa = 0
         else:
@@ -89,7 +86,7 @@ def algo_sarsa(q, state, action):
         old = allq0[0,action]
         tde = reward + qsa - old
         new = old + ALPHA * tde
-        q.set(state0.inputs(), action, new, allq0)
+        policy.q.set(state0.inputs(), action, new, allq0)
     else:
         tde = 0
     global sum_td_error, count_td_error
@@ -99,52 +96,10 @@ def algo_sarsa(q, state, action):
     log.debug('transition: %s --|%d|-> %s', state0, action, state)
     return state, action1
 
-def algo_play(q, state, action):
+def algo_play(policy, state, action):
     state0 = copy.deepcopy(state)
-    action,_,_ = policy(state, q)
+    action,_,_ = policy.play(state)
     state,_ = state.transition(action)
     # log transition
     log.debug('transition: %s --|%d|-> %s', state0, action, state)
     return state, -1
-
-def policy(state, q):
-    """
-    Return preferred action for the given state:
-    - a in [0-5] : keep dice value a and reroll
-    - a in [6-11]: keep dice value a-6 and stop
-    - a = -1: no possible action
-    """
-    candidates = state.find_candidates()
-    log.debug('candidates for %s: %s', state, candidates)    
-    if len(candidates) == 0:
-        # no dice available -> this roll is lost
-        return -1, [], np.empty((0,0))
-    allQ = q.get_all(state.inputs())
-    if TEMPERATURE > 0:
-        # softmax distribution
-        ps = np.zeros(len(candidates))
-        idx = 0
-        for c in candidates:
-            ps[idx] = allQ[0,c]
-            idx += 1
-        action = np.random.choice(candidates, p=softmax(ps))
-    elif random.random() < EPSILON:
-        # e-greedy exploration
-        action = random.choice(candidates)
-    else:
-        # exploitation: return best action
-        action = candidates[ max(range(len(candidates)), key=lambda i: allQ[0,candidates[i]]) ]
-    return action, candidates, allQ
-
-def softmax(q_vector):
-    """
-    Return a softmax distribution of the values in q_vector.
-    """
-    q_vector = np.exp(q_vector / TEMPERATURE)
-    q_vector /= np.sum(q_vector)
-    # fix normalization
-    q_vector[np.argmax(q_vector)] += 1-np.sum(q_vector)
-    global sum_max_softmax, count_softmax
-    sum_max_softmax += max(q_vector)
-    count_softmax += 1
-    return q_vector
