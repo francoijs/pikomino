@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # pylint: disable=multiple-imports
 
 import time, signal, argparse, logging

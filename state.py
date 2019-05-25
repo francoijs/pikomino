@@ -27,7 +27,7 @@ class sortedlist(list):
 
 class State(object):
     
-    def __init__(self, stash=range(21,37),
+    def __init__(self, stash=list(range(21,37)),
                  opponent=None, player=None,
                  dices=[0,0,0,0,0,0], roll=None):
         if not roll:

@@ -114,7 +114,7 @@ class PolicyEGreedy(Policy):
             action = random.choice(candidates)
         else:
             # exploitation: return best action
-            action = candidates[ max(range(len(candidates)), key=lambda i: allQ[0,candidates[i]]) ]
+            action = candidates[ max(list(range(len(candidates))), key=lambda i: allQ[0,candidates[i]]) ]
         return action, candidates, allQ
 
 
