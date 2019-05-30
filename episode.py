@@ -1,7 +1,6 @@
-import copy, random, bisect, logging, math
-import numpy as np
+import logging
 from state import State
-from algo import algo_qlearning
+from algo import AlgoQLearning
 
 
 log = logging.getLogger('episode')
@@ -31,7 +30,7 @@ class EpisodePiko():
         )
 
     @staticmethod
-    def episode(pol_player, pol_opponent=None, algo=algo_qlearning):
+    def episode(pol_player, pol_opponent=None, algo=AlgoQLearning()):
         """ Run an episode and return final state. """
         # policy of opponent
         if not pol_opponent:
@@ -47,7 +46,7 @@ class EpisodePiko():
                 policy = pol_player
             else:
                 policy = pol_opponent
-            state,action = algo(policy, state, action)
+            state,action = algo.update(policy, state, action)
             rounds += 1
             if state.end_of_game():
                 # game is over

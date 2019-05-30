@@ -2,7 +2,7 @@
 
 import logging, argparse, signal
 from episode import EpisodePiko
-from algo import set_params, algo_play
+from algo import AlgoPlay
 from policy import PolicyExploit
 
 
@@ -19,7 +19,7 @@ def match(p1, p2, games):
     log.info('playing <%s> against <%s>...', p1.q.fname, 'itself' if p1==p2 else p2.q.fname)
     wins_left = wins_right = draws = played = 0
     for game in range(games):
-        state,_,rounds = EpisodePiko.episode(p1, p2, algo=algo_play)
+        state,_,rounds = EpisodePiko.episode(p1, p2, algo=AlgoPlay())
         log.info('game %d: rounds=%3d, winner=%s, score=%d/%d',
                  game, rounds,
                  'left' if state.player_wins() else 'right' if state.opponent_wins() else 'draw',
@@ -57,9 +57,6 @@ def main():
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
     log.debug(args)
-    
-    # playing mode
-    set_params(0, debug=args.debug)
 
     if args.jy:
         # play against JY model

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import sys, argparse, copy, random
-import algo
 from q_network import NetworkQ
 from state import State
 from policy import Policy
@@ -15,7 +14,6 @@ def main(argv=sys.argv):
     args = parser.parse_args()
     print(str(args))
     # playing mode
-    algo.set_params(0, debug=True)
     q = NetworkQ(args.model, State=State)
     policy = Policy.create('exploit', q)
     # initial state
