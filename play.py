@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import sys, argparse, copy, random
-from q_network import NetworkQ
 from state import State
 from policy import Policy
 
@@ -11,14 +10,23 @@ def main(argv=sys.argv):
     parser = argparse.ArgumentParser(description='Play a game.')
     parser.add_argument('model', metavar='MODEL', type=str,
                         help='model file')
+    parser.add_argument('--game', '-g', metavar='GAME', type=str, default='piko',
+                        help='name of game (default=piko)')
+    parser.add_argument('--random', action='store_true', default=False,
+                        help='play against random policy')
     args = parser.parse_args()
     print(str(args))
     # playing mode
-    q = NetworkQ(args.model, State=State)
-    policy = Policy.create('exploit', q)
+    if args.random:
+        policy = Policy.create('random')
+    else:
+        from q_network import NetworkQ
+        q = NetworkQ(args.model, State=State)
+        policy = Policy.create('exploit', q)
     # initial state
-    my_state = ai_state = State()
-
+    my_state = State.create(args.game)
+    ai_state = my_state.change_turn()
+    
     # who starts?
     human_starts = random.choice([True, False])
     if human_starts:
@@ -35,11 +43,11 @@ def main(argv=sys.argv):
             my_state = ai_state.change_turn()
             while True:
                 prev_state = copy.deepcopy(my_state)
-                print('state: %s / total: %d' % (my_state, my_state.total()))
+                print('state: %s' % (my_state,))
                 candidates = my_state.find_candidates()
                 if not candidates:
                     # update state
-                    my_state.lose_tile()
+                    my_state = my_state.transition(-1)
                     break
                 action = -1
                 while action not in candidates:
@@ -50,11 +58,11 @@ def main(argv=sys.argv):
                     except:
                         action = -1
                 my_state,_ = my_state.transition(action)
-                if action>5:
+                if my_state.end_of_turn():
                     break
             # print report for the round
-            report('you', my_state.player, prev_state)
-            if not my_state.stash:
+            my_state.report('you', prev_state)
+            if my_state.end_of_game():
                 end_game(my_state)
                 return 0
         else:
@@ -71,21 +79,10 @@ def main(argv=sys.argv):
             if ai_state.end_of_turn():
                 break
         # print report for the round
-        report('AI', ai_state.player, prev_state)
-        if not ai_state.stash:
+        ai_state.report('AI', prev_state)
+        if ai_state.end_of_game():
             end_game(ai_state.change_turn())
             return 0
-
-def report(name, mine_now, state_before):
-    if mine_now:
-        tile = mine_now[-1]
-        if state_before.opponent and mine_now[-1]==state_before.opponent[-1]:
-            print('%s steal tile %d' % (name, tile))
-            return
-        elif tile in state_before.stash:
-            print('%s take tile %d' % (name, tile))
-            return
-    print(name + ' lose one tile')
 
 def end_game(state):
     my = state.player_score()

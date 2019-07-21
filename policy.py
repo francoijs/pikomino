@@ -7,7 +7,7 @@ log = logging.getLogger('policy')
 class Policy(object):
 
     @staticmethod
-    def create(typ, q):
+    def create(typ, q=None):
         if typ is 'softmax':
             return PolicySoftmax(q)
         elif typ is 'egreedy':
@@ -15,7 +15,7 @@ class Policy(object):
         elif typ is 'exploit':
             return PolicyExploit(q)
         elif typ is 'random':
-            return PolicyRandom(q)
+            return PolicyRandom()
         else:
             raise 'unknown policy type <%d>' % (typ,)
 
@@ -123,6 +123,19 @@ class PolicyExploit(PolicyEGreedy):
         PolicyEGreedy.__init__(self, q, 0)
     
 
-class PolicyRandom(PolicyEGreedy):
-    def __init__(self, q):
-        PolicyEGreedy.__init__(self, q, 1)
+class PolicyRandom(Policy):
+    def __init__(self):
+        Policy.__init__(self, None)
+    
+    @property
+    def name(self):
+        return 'random policy'
+    
+    def play(self, state):
+        candidates = state.find_candidates()
+        log.debug('candidates for %s: %s', state, candidates)    
+        if len(candidates) == 0:
+            # no dice available -> this roll is lost
+            return -1, [], np.empty((0,0))
+        action = random.choice(candidates)
+        return action, candidates, np.empty((0,0))
