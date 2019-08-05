@@ -8,8 +8,18 @@ class State:
         elif name == 'ttt':
             from state_ttt import State
         else:
-            raise 'unknown game "%s"' % (name,)
+            raise Exception('unknown game "%s"' % (name,))
         return State()
 
     def report(self, name, prev_state):
         print('<missing report>')
+
+    def candidates(self):
+        raise NotImplementedError()
+
+    def draw(self):
+        raise NotImplementedError()
+    def player_wins(self):
+        raise NotImplementedError()
+    def opponent_wins(self):
+        raise NotImplementedError()

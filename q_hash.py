@@ -1,17 +1,25 @@
 import os
-import cPickle as pickle
+#import cPickle as pickle
+import pickle
+import logging
+import numpy as np
 
+
+log = logging.getLogger('q_hash')
 
 class HashQ:
-    def __init__(self, fname):
+
+    def __init__(self, fname, outputs):
+        self.outputs = outputs
         self.fname = fname = fname + '.db'
         if not os.path.isfile(fname):
-            print 'creating empty %s' % (fname)
+            log.info('creating empty %s', fname)
             self.q = {}
         else:
-            with open(fname, 'rb') as file:
-                self.q = pickle.load(file)
-            print 'loaded %d q-values from' % (len(self.q)), fname
+            with open(fname, 'rb') as fil:
+                self.q = pickle.load(fil)
+            log.info('loaded %d q-vectors from %s', len(self.q), fname)
+
     def __len__(self):
         return len(self.q)
     def keys(self):
@@ -19,24 +27,31 @@ class HashQ:
     def values(self):
         return self.q.values()
 
-    @staticmethod
-    def _hash(state, action):
-        return hash( (tuple(state[0]), tuple(state[1]), state[2], action) )
+    def get_all(self, state):
+        return self.q.get(hash(tuple(state.tolist()[0])), np.zeros((1, self.outputs)))
     def get(self, state, action):
-        return self.q.get(self._hash(state,action), 0)
-    def set(self, state, action, val):
-        self.q[self._hash(state,action)] = val
+        allQ = self.get_all(state)
+        return allQ[action]
+    def set(self, state, action, val, oldQ=None):
+        if oldQ is None:
+            oldQ = self.get_all(state)
+        oldQ[0,action] = val
+        self.q[hash(tuple(state.tolist()[0]))] = oldQ
+        log.debug('%s\t%s', state.tolist()[0], oldQ)
 
-    def save(self):
-        with open(self.fname, 'wb') as file:
-            pickle.dump(self.q, file, pickle.HIGHEST_PROTOCOL)
-        print '%d q-values saved to' % (len(self.q)), self.fname
+    def save(self, epoch=0):
+        with open(self.fname, 'wb') as fil:
+            pickle.dump(self.q, fil, pickle.HIGHEST_PROTOCOL)
+        log.info('%d q-vectors saved to %s', len(self.q), self.fname)
 
 
-class StrategyHashQ(HashQ):
-    @staticmethod
-    def _hash(state, action):
-        return hash(( 0 if not state[0] else min(state[0]),  # smallest available tile
-                      0 if not state[1] else state[1][-1],   # opponent top tile
-                      state[4] - state[2],                   # score delta
-                      action ))                              # action
+class MemoryOnlyHashQ(HashQ):
+
+    def __init__(self, fname, outputs):
+        self.outputs = outputs
+        self.fname = 'unused'
+        self.q = {}
+        log.info('create memory-only q-table')
+
+    def save(self, epoch=0):
+        pass

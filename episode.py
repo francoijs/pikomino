@@ -1,15 +1,62 @@
-import logging
+import logging, copy
 from state import State
 from algo import AlgoQLearning
+from policy import PolicyExploit
 
 
 log = logging.getLogger('episode')
 tot_rounds = tot_turns = tot_mark = tot_score = tot_null = won = episodes = 0
 
 
-class EpisodePiko():
+class Episode():
 
-    dbname = 'piko'
+    def __init__(self, algo, pol_player, pol_opponent=None):
+        self.algo = algo
+        self.policy_player = pol_player
+        # policy of opponent
+        self.policy_opponent = pol_opponent or PolicyExploit(algo.q)
+
+    def run(self, state0):
+        """ Run an episode and return final state. """
+        # initial state & action
+        action = -1
+        my_turn = True
+        # number of steal
+        turns = rounds = 0
+        state = state0
+        my_turn = state.turn_of_player()
+        while True:
+            if my_turn:
+                state0 = copy.deepcopy(state)
+                # turn of player
+                action, _, _ = self.policy_player.play(state)
+                state = state0.transition(action)
+                rounds += 1
+                turns += 1
+                my_turn = False
+                if state.end_of_game():
+                    break
+            # turn of opponent
+            action1, _, _ = self.policy_opponent.play(state)
+            state = state.transition(action1)
+            rounds += 1
+            turns += 1
+            my_turn = True
+            if state.end_of_game():
+                break
+            # train policy
+            if state0.turn_of_player():
+                self.algo.update(state0, state, action, 0)
+        if state.player_wins():
+            reward = 1
+        elif state.draw():
+            reward = -.5
+        else:
+            reward = -1
+        # train policy
+        self.algo.update(state0, state, action, reward)
+        return reward, turns, rounds
+    
 
     @staticmethod
     def reset_stats():
@@ -30,13 +77,12 @@ class EpisodePiko():
         )
 
     @staticmethod
-    def episode(pol_player, pol_opponent=None, algo=AlgoQLearning()):
+    def episode(state, pol_player, pol_opponent=None):
         """ Run an episode and return final state. """
         # policy of opponent
         if not pol_opponent:
             pol_opponent = pol_player
         # initial state & action
-        state = State()
         action = -1
         my_turn = True
         # number of steal
@@ -46,7 +92,7 @@ class EpisodePiko():
                 policy = pol_player
             else:
                 policy = pol_opponent
-            state,action = algo.update(policy, state, action)
+            state, action = algo.update(policy, state, action)
             rounds += 1
             if state.end_of_game():
                 # game is over
@@ -54,7 +100,7 @@ class EpisodePiko():
             # change player?
             if state.end_of_turn():
                 turns += 1
-                if state.player and state.player[-1]==opp_top_tile:
+                if state.player and state.player[-1] == opp_top_tile:
                     steal += 1
                 if state.player:
                     opp_top_tile = state.player[-1]

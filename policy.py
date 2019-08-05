@@ -89,6 +89,7 @@ class PolicyEGreedy(Policy):
     def __init__(self, q, epsilon=0.1):
         Policy.__init__(self, q)
         self.EPSILON     = epsilon    # exploration ratio
+        log.debug('e-greedy: epsilon=%.2f', self.EPSILON)
 
     def reset_stats(self):
         pass
