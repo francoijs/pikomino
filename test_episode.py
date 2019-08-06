@@ -28,26 +28,30 @@ class TestEpisode(unittest.TestCase):
         self.algo = AlgoQLearning(MemoryOnlyHashQ('', StateTest.OUTPUTS))
         self.algo.update = CopyingMock()
 
-    def test_player_starts_and_draw(self):
-        self.policy.play.side_effect = [(0,0,0), (2,0,0)]
-        ep = Episode(self.algo, self.policy)
-        self.assertEqual((-.5, 3, 3), ep.run(StateTest()))
-        self.assertEqual(2, self.algo.update.call_count)
-
     def test_player_starts_and_wins(self):
         self.policy.play.side_effect = [(1,0,0), (2,0,0)]
-        ep = Episode(self.algo, self.policy)
-        self.assertEqual((1, 3, 3), ep.run(StateTest()))
+        state, rounds, turns = Episode(self.algo, self.policy).run(StateTest())
+        self.assertEqual(state.player_wins(), True)
+        self.assertEqual((3, 3), (rounds, turns))
+        self.assertEqual(2, self.algo.update.call_count)
+
+    def test_player_starts_and_draw(self):
+        self.policy.play.side_effect = [(0,0,0), (2,0,0)]
+        state, rounds, turns = Episode(self.algo, self.policy).run(StateTest())
+        self.assertEqual(state.draw(), True)
+        self.assertEqual((3, 3), (rounds, turns))
         self.assertEqual(2, self.algo.update.call_count)
 
     def test_opponent_starts_and_wins(self):
         self.policy.play.side_effect = [(2,0,0)]
-        ep = Episode(self.algo, self.policy)
-        self.assertEqual((-1, 3, 3), ep.run(StateTest(2)))
+        state, rounds, turns = Episode(self.algo, self.policy).run(StateTest(False))
+        self.assertEqual(state.opponent_wins(), True)
+        self.assertEqual((3, 3), (rounds, turns))
         self.assertEqual(1, self.algo.update.call_count)
 
     def test_opponent_starts_and_draw(self):
         self.policy.play.side_effect = [(1,0,0)]
-        ep = Episode(self.algo, self.policy)
-        self.assertEqual((-.5, 3, 3), ep.run(StateTest(2)))
+        state, rounds, turns = Episode(self.algo, self.policy).run(StateTest(False))
+        self.assertEqual(state.draw(), True)
+        self.assertEqual((3, 3), (rounds, turns))
         self.assertEqual(1, self.algo.update.call_count)

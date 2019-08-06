@@ -55,26 +55,25 @@ class Episode():
             reward = -1
         # train policy
         self.algo.update(state0, state, action, reward)
-        return reward, turns, rounds
-    
+        return state, turns, rounds
 
-    @staticmethod
-    def reset_stats():
-        global tot_rounds, tot_turns, tot_mark, tot_score, tot_null, won, episodes
-        tot_rounds = tot_turns = tot_mark = tot_score = tot_null = won = episodes = 0
+    # @staticmethod
+    # def reset_stats():
+    #     global tot_rounds, tot_turns, tot_mark, tot_score, tot_null, won, episodes
+    #     tot_rounds = tot_turns = tot_mark = tot_score = tot_null = won = episodes = 0
 
-    @staticmethod
-    def print_stats():
-        global tot_rounds, tot_turns, tot_mark, tot_score, tot_null, won, episodes
-        if won:
-            avg_score = float(tot_score)/won
-        else:
-            avg_score = 0
-        return 'null: %.1f%% / avg score: %.1f / avg mark: %.2f%%' % (
-            100 * float(tot_null)/episodes,
-            avg_score,
-            float(tot_mark)/episodes
-        )
+    # @staticmethod
+    # def print_stats():
+    #     global tot_rounds, tot_turns, tot_mark, tot_score, tot_null, won, episodes
+    #     if won:
+    #         avg_score = float(tot_score)/won
+    #     else:
+    #         avg_score = 0
+    #     return 'null: %.1f%% / avg score: %.1f / avg mark: %.2f%%' % (
+    #         100 * float(tot_null)/episodes,
+    #         avg_score,
+    #         float(tot_mark)/episodes
+    #     )
 
     @staticmethod
     def episode(state, pol_player, pol_opponent=None):

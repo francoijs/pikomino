@@ -12,7 +12,7 @@ class TestAlgoQLearning(TestCase):
 
     def setUp(self):        
         logging.basicConfig(
-            level=logging.INFO,
+            level=logging.DEBUG,
             format="[%(asctime)s] %(levelname)s %(name)s: %(message)s"
         )
 
@@ -31,9 +31,9 @@ class TestAlgoQLearning(TestCase):
         q = MemoryOnlyHashQ('test', 3)
         algo = AlgoQLearning(q)
         # train on 10 games
-        for _ in range(100):
+        for _ in range(10):
             ep = Episode(algo, PolicyRandom())
-            ep.run(StateTest(random.choice([1,2])))
+            ep.run(StateTest(random.choice([True, False])))
         # check if policy is optimal
         policy = PolicyExploit(q)
  #       print(q.get_all(StateTest().inputs()))

@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 
-import sys, argparse, copy, random
+import sys, argparse, copy, random, logging
 from state import State
 from policy import Policy
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] %(levelname)s %(name)s: %(message)s",
+)
+log = logging.getLogger('main')
 
 
 def main(argv=sys.argv):
@@ -14,18 +20,27 @@ def main(argv=sys.argv):
                         help='name of game (default=piko)')
     parser.add_argument('--random', action='store_true', default=False,
                         help='play against random policy')
+    parser.add_argument('--debug', '-d', action='store_true', default=False, 
+                        help='display debug log')
     args = parser.parse_args()
     print(str(args))
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
     # playing mode
     if args.random:
         policy = Policy.create('random')
     else:
-        from q_network import NetworkQ
-        q = NetworkQ(args.model, State=State)
+        state = State.create(args.game)
+        if args.model.endswith('.db'):
+            from q_hash import HashQ
+            q = HashQ(args.model[:-3], state.OUTPUTS)
+        else:
+            from q_network import NetworkQ
+            q = NetworkQ(args.model)
         policy = Policy.create('exploit', q)
     # initial state
-    my_state = State.create(args.game)
-    ai_state = my_state.change_turn()
+    my_state = State.create(args.game, True)
+    ai_state = State.create(args.game, False)
     
     # who starts?
     human_starts = random.choice([True, False])
@@ -40,7 +55,6 @@ def main(argv=sys.argv):
         if human_starts:
             # my turn
             print('your turn:')
-            my_state = ai_state.change_turn()
             while True:
                 prev_state = copy.deepcopy(my_state)
                 print('state: %s' % (my_state,))
@@ -57,7 +71,7 @@ def main(argv=sys.argv):
                         sys.exit()
                     except:
                         action = -1
-                my_state,_ = my_state.transition(action)
+                my_state = my_state.transition(action)
                 if my_state.end_of_turn():
                     break
             # print report for the round
@@ -65,16 +79,16 @@ def main(argv=sys.argv):
             if my_state.end_of_game():
                 end_game(my_state)
                 return 0
+            ai_state = my_state.change_turn()
         else:
             human_starts = True    
 
         # AI turn
         print('AI turn:')
-        ai_state = my_state.change_turn()
         while True:
             prev_state = copy.deepcopy(ai_state)
             action,_,_ = policy.play(ai_state)
-            ai_state,_ = ai_state.transition(action)
+            ai_state = ai_state.transition(action)
             print('transition: %s --|%d|-> %s' % (prev_state, action, ai_state))
             if ai_state.end_of_turn():
                 break
@@ -83,12 +97,13 @@ def main(argv=sys.argv):
         if ai_state.end_of_game():
             end_game(ai_state.change_turn())
             return 0
+        my_state = ai_state.change_turn()
 
 def end_game(state):
     my = state.player_score()
     her = state.opponent_score()
     if her>my:
-        print('you lose %d/%d' % (her, my))
+        print('you lose %d/%d' % (my, her))
     elif my>her:
         print('you win %d/%d' % (my, her))
     else:

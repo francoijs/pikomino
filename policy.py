@@ -113,6 +113,7 @@ class PolicyEGreedy(Policy):
         if random.random() < self.EPSILON:
             # e-greedy exploration
             action = random.choice(candidates)
+            log.debug('exploring action %d...', action)  
         else:
             # exploitation: return best action
             action = candidates[ max(list(range(len(candidates))), key=lambda i: allQ[0,candidates[i]]) ]
