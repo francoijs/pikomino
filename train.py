@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # pylint: disable=multiple-imports
 
-import time, signal, argparse, logging
-import episode
-import state as piko_state
+import time, signal, argparse, logging, random
+from episode import Episode
+from state import State
 from algo import AlgoSarsa, AlgoQLearning, AlgoPlay
-from policy import Policy
+from policy import Policy, PolicyExploit
 
 
 DEFAULT_EPISODES    = 10000
@@ -28,11 +28,13 @@ def stop(_signum, _frame):
     global running
     running = False
 
-def train(parser, Episode, State):
+def train(parser):
     # sigterm
     signal.signal(signal.SIGINT, stop)
     signal.signal(signal.SIGTERM, stop)
     # parse args
+    parser.add_argument('--game', '-g', metavar='GAME', type=str, default='piko',
+                        help='name of game (default=piko)')
     parser.add_argument('--episodes', '-e', metavar='N', type=int, default=DEFAULT_EPISODES,
                         help='total number of episodes (default=%d)'%(DEFAULT_EPISODES))
     parser.add_argument('--step', '-s', metavar='S', type=int, default=DEFAULT_STEP,
@@ -62,6 +64,8 @@ def train(parser, Episode, State):
     parser.add_argument('--debug', '-d', action='store_true', default=False, 
                         help='display debug log')
     args = parser.parse_args()
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
     log.debug(args)
     # base directory
     if not args.base:
@@ -71,18 +75,19 @@ def train(parser, Episode, State):
     # params of training
     EPISODES = args.episodes
     STEP     = args.step
+    # q-store
+    state = State.create(args.game)
+    if args.hash:
+        from q_hash import HashQ
+        q = HashQ(args.base+args.game, state.OUTPUTS)
+    else:
+        from q_network import NetworkQ
+        q = NetworkQ(args.base+args.game, state.INPUTS, state.OUTPUTS, layers=args.layers, width=args.width)
     # algo
     if args.sarsa > 0:
         algo = AlgoSarsa()
     else:
-        algo = AlgoQLearning()
-    # q-store
-    if args.hash:
-        from q_hash import StrategyHashQ
-        q = StrategyHashQ(args.base+Episode.dbname)
-    else:
-        from q_network import NetworkQ
-        q = NetworkQ(args.base+Episode.dbname, State, layers=args.layers, width=args.width)
+        algo = AlgoQLearning(q)
     # policy
     if args.softmax > 0:
         policy = Policy.create('softmax', q)
@@ -96,11 +101,12 @@ def train(parser, Episode, State):
     # counters
     won = episodes = tot_turns = tot_backups = 0
     algo.reset_stats()
-    Episode.reset_stats()
     policy.reset_stats()
     time0 = time.time()
     while running:
-        state,turns,backups = Episode.episode(policy, algo=algo)
+        # initial state
+        state = State.create(args.game, random.choice([True, False]))
+        state,turns,backups = Episode(algo, policy).run(state)
         episodes += 1
         if not args.validation:
             # no validation: update stats during training
@@ -116,34 +122,29 @@ def train(parser, Episode, State):
                 stats_step = args.validation
                 # run some validation episodes
                 won = tot_turns = tot_backups = 0
-                Episode.reset_stats()
                 # disable training
                 algo.set_params(0)
-                policy.set_params(0, 0)
                 algo_play = AlgoPlay()
                 for _ in range(stats_step):
-                    state,turns,backups = Episode.episode(policy, algo=algo_play)
+                    state = State.create(args.game, random.choice([True, False]))
+                    state,turns,backups = Episode(algo_play, PolicyExploit(q)).run(state)
                     if state.player_wins():
                         won += 1
                     tot_turns += turns
                     tot_backups += backups
                 # restore training settings
                 algo.set_params(alpha)
-                policy.set_params(epsilon, args.softmax)
             # report stats
             rate = 100 * float(won)/stats_step
             mean_td_error  = algo.get_stats()
-            mean_max_softmax = policy.get_stats()
             log.info('games: %d / won: %.1f%% of %d / avg turns: %.1f / avg backups: %.1f\n'
-                     'time: %.2fms/episode / mean td error: %.3f / mean softmax prob: %.2f\n'
-                     '%s',
+                     'time: %.2fms/episode / mean td error: %.3f',
                      episodes, rate, stats_step,
                      float(tot_turns)/stats_step,  float(tot_backups)/stats_step,
-                     mean_duration, mean_td_error, mean_max_softmax,
-                     Episode.print_stats())
+                     mean_duration, mean_td_error
+            )
             won = tot_turns = tot_backups = 0
             algo.reset_stats()
-            Episode.reset_stats()
             policy.reset_stats()            
             q.save(epoch=(episodes+args.offset))
             if args.decay:
@@ -163,4 +164,4 @@ def train(parser, Episode, State):
 
     
 if __name__ == "__main__":
-    train(argparse.ArgumentParser(description='Train the strategy.'), episode.EpisodePiko, piko_state.State)
+    train(argparse.ArgumentParser(description='Train the strategy.'))

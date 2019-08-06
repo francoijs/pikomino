@@ -25,11 +25,10 @@ class State:
     def find_candidates(self):
         raise NotImplementedError()
 
-    def draw(self):
-        raise NotImplementedError()
-
     def player_wins(self):
         raise NotImplementedError()
-
     def opponent_wins(self):
         raise NotImplementedError()
+    def draw(self):
+        return self.end_of_game() and not self.player_wins() and not self.opponent_wins()
+

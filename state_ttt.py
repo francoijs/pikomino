@@ -1,23 +1,23 @@
-import random, bisect, copy
+import copy
 import numpy as np
 from state import State as Base
 
 
 class State(Base):
     
-    def __init__(self, cells=[None]*9, player='0'):
-        self.cells = cells
-        self.player = player
+    def __init__(self, player_starts=True):
+        self.cells = [None] * 9
+        self.player = '0' if player_starts else '1'
 
     def __eq__(self, other):
         return self.cells == other.cells
 
     def __repr__(self):
-        return '['+str(self.cells[0])+'\t'+str(self.cells[1])+'\t'+str(self.cells[2])+'\n'+'\t'+str(self.cells[3])+'\t'+str(self.cells[4])+'\t'+str(self.cells[5])+'\n'+'\t'+str(self.cells[6])+'\t'+str(self.cells[7])+'\t'+str(self.cells[8])+']'
-    
-
-    def end_turn(self):
-        return self, self.get_reward()
+        grid  = '\n([\t'+str(self.cells[0])+'\t'+str(self.cells[1])+'\t'+str(self.cells[2])+'\n'
+        grid += '\t'+str(self.cells[3])+'\t'+str(self.cells[4])+'\t'+str(self.cells[5])+'\n'
+        grid += '\t'+str(self.cells[6])+'\t'+str(self.cells[7])+'\t'+str(self.cells[8])+'],\t'
+        grid += self.player+')'
+        return grid
     
     positions = [
         [0, 1, 2],
@@ -30,7 +30,7 @@ class State(Base):
         [2, 4, 6],
     ]
 
-    def victory(self):
+    def winner(self):
         for pos in State.positions:
             symbol = self.cells[pos[0]]
             winner = symbol
@@ -43,7 +43,7 @@ class State(Base):
         return None
 
     def end_of_game(self):
-        winner = self.victory()
+        winner = self.winner()
         if winner:
             return True
         if None not in self.cells:
@@ -51,18 +51,13 @@ class State(Base):
             return True
         return False
 
-    def end_of_turn(self):
-        return True
-
-    def change_turn(self):
-        return State(cells=self.cells,
-                     player=str(1-int(self.player))
-        )
+    def turn_of_player(self):
+        return self.player == '0'
 
     def player_wins(self):
-        return self.victory() == '0'
+        return self.winner() == '0'
     def opponent_wins(self):
-        return self.victory() == '1'
+        return self.winner() == '1'
 
     def player_score(self):
         return 1 if self.player_wins() else 0
@@ -71,19 +66,15 @@ class State(Base):
     
     def transition(self, action):
         """ Apply action on state and return new state. """
-        self.cells[action] = self.player
+        state = copy.deepcopy(self)
+        state.cells[action] = self.player
+        # next player
+        state.player = str(1 - int(self.player))
         # end of turn
-        return self.end_turn()
+        return state
 
     def report(self, name, prev_state):
         pass
-    
-    def get_reward(self):
-        if not self.victory():
-            return 0
-        if self.player_wins():
-            return 1
-        return -1
     
     def find_candidates(self):
         """ Return list of candidates actions """
@@ -102,7 +93,7 @@ class State(Base):
         for i in range(len(self.cells)):
             if not self.cells[i]:
                 res[0, 3*i] = 1
-            if self.cells[i] == self.player:
+            elif self.cells[i] == self.player:
                 res[0, 3*i+1] = 1
             else:
                 res[0, 3*i+2] = 1

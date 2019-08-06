@@ -40,9 +40,13 @@ class HashQ:
         log.debug('%s\t%s', state.tolist()[0], oldQ)
 
     def save(self, epoch=0):
-        with open(self.fname, 'wb') as fil:
+        if epoch:
+            epoch = '-'+str(epoch)
+        else:
+            epoch = ''
+        with open(self.fname+epoch, 'wb') as fil:
             pickle.dump(self.q, fil, pickle.HIGHEST_PROTOCOL)
-        log.info('%d q-vectors saved to %s', len(self.q), self.fname)
+        log.info('%d q-vectors saved to %s', len(self.q), self.fname+epoch)
 
 
 class MemoryOnlyHashQ(HashQ):

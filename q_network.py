@@ -15,15 +15,14 @@ log = logging.getLogger('network_q')
 
 class NetworkQ():
 
-    def __init__(self, fname, State=None, layers=3, width=0):
-        self.State = State
+    def __init__(self, fname, inputs=0, outputs=0, layers=3, width=0):
         if fname.find('.h5') == -1:
             if width == 0:
-                width = self.State.INPUTS
-            fname = '%s-inputs%d-hidden%d-width%d.h5' % (fname, State.INPUTS, layers, width)
+                width = inputs
+            fname = '%s-inputs%d-hidden%d-width%d.h5' % (fname, inputs, layers, width)
         self.fname = fname
         if not os.path.isfile(self.fname):
-            self.model = self._new_model(layers, width)
+            self.model = self._new_model(inputs, outputs, layers, width)
         else:
             self.model = self._load_model(self.fname)
         for layer in self.model.layers:
@@ -32,15 +31,15 @@ class NetworkQ():
         self._cache_state = None
         self._cache_q = None
 
-    def _new_model(self, layers, width):
+    def _new_model(self, inputs, outputs, layers, width):
         # Keras/TF
         log.info('creating new model %s', self.fname)
         model = Sequential()
-        model.add(Dense(self.State.INPUTS, input_dim=self.State.INPUTS, activation='relu'))
+        model.add(Dense(inputs, input_dim=inputs, activation='relu'))
         while layers>0:
             model.add(Dense(width, activation='relu'))
             layers -= 1
-        model.add(Dense(self.State.OUTPUTS, activation='linear'))
+        model.add(Dense(outputs, activation='linear'))
         model.compile(loss='mse', optimizer=Adam(lr=LEARNING_RATE))
         return model
 
