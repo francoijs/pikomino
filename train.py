@@ -79,7 +79,7 @@ def train(parser):
     state = State.create(args.game)
     if args.hash:
         from q_hash import HashQ
-        q = HashQ(args.base+args.game, state.OUTPUTS)
+        q = HashQ(args.base+args.game+'.db', state.OUTPUTS)
     else:
         from q_network import NetworkQ
         q = NetworkQ(args.base+args.game, state.INPUTS, state.OUTPUTS, layers=args.layers, width=args.width)
@@ -138,7 +138,7 @@ def train(parser):
             rate = 100 * float(won)/stats_step
             mean_td_error  = algo.get_stats()
             log.info('games: %d / won: %.1f%% of %d / avg turns: %.1f / avg backups: %.1f\n'
-                     'time: %.2fms/episode / mean td error: %.3f',
+                     'time: %.2fms/episode / mean abs td error: %.3f',
                      episodes, rate, stats_step,
                      float(tot_turns)/stats_step,  float(tot_backups)/stats_step,
                      mean_duration, mean_td_error

@@ -1,5 +1,4 @@
 import os
-#import cPickle as pickle
 import pickle
 import logging
 import numpy as np
@@ -11,7 +10,7 @@ class HashQ:
 
     def __init__(self, fname, outputs):
         self.outputs = outputs
-        self.fname = fname = fname + '.db'
+        self.fname = fname
         if not os.path.isfile(fname):
             log.info('creating empty %s', fname)
             self.q = {}
@@ -29,9 +28,11 @@ class HashQ:
 
     def get_all(self, state):
         return self.q.get(hash(tuple(state.tolist()[0])), np.zeros((1, self.outputs)))
+    
     def get(self, state, action):
         allQ = self.get_all(state)
         return allQ[action]
+
     def set(self, state, action, val, oldQ=None):
         if oldQ is None:
             oldQ = self.get_all(state)

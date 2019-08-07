@@ -102,10 +102,8 @@ class AlgoSarsa(Algo):
 
 class AlgoPlay(Algo):
 
-    def update(self, policy, state, action):
-        state0 = copy.deepcopy(state)
-        action,_,_ = policy.play(state)
-        state,_ = state.transition(action)
+    def update(self, state0, state, action, _):
+        state = state0.transition(action)
         # log transition
         log.debug('transition: %s --|%d|-> %s', state0, action, state)
         return state, -1

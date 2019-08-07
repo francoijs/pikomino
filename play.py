@@ -33,7 +33,7 @@ def main(argv=sys.argv):
         state = State.create(args.game)
         if args.model.endswith('.db'):
             from q_hash import HashQ
-            q = HashQ(args.model[:-3], state.OUTPUTS)
+            q = HashQ(args.model, state.OUTPUTS)
         else:
             from q_network import NetworkQ
             q = NetworkQ(args.model)
