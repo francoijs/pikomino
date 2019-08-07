@@ -38,9 +38,11 @@ class AlgoQLearning(Algo):
     def reset_stats(self):
         self.sum_td_error = self.count_td_error = 0
 
-    def update(self, state0, state, action, reward):
-        allq0 = self.q.get_all(state0.inputs())
-        allq  = self.q.get_all(state.inputs())
+    def update(self, state0, state, action, reward, allq0=None, allq=None):
+        if allq0 is None:
+            allq0 = self.q.get_all(state0.inputs())
+        if allq is None:
+            allq  = self.q.get_all(state.inputs())
         if state.end_of_game():
             qsa = reward
         elif allq[0].any():

@@ -29,7 +29,7 @@ class Episode():
             if my_turn:
                 state0 = copy.deepcopy(state)
                 # turn of player
-                action, _, _ = self.policy_player.play(state)
+                action, _, allq0 = self.policy_player.play(state)
                 state = state0.transition(action)
                 rounds += 1
                 turns += 1
@@ -37,7 +37,7 @@ class Episode():
                 if state.end_of_game():
                     break
             # turn of opponent
-            action1, _, _ = self.policy_opponent.play(state)
+            action1, _, allq = self.policy_opponent.play(state)
             state = state.transition(action1)
             rounds += 1
             turns += 1
@@ -46,7 +46,7 @@ class Episode():
                 break
             # train policy
             if state0.turn_of_player():
-                self.algo.update(state0, state, action, 0)
+                self.algo.update(state0, state, action, 0, allq0, allq)
         if state.player_wins():
             reward = 1
         elif state.draw():
@@ -54,7 +54,7 @@ class Episode():
         else:
             reward = -1
         # train policy
-        self.algo.update(state0, state, action, reward)
+        self.algo.update(state0, state, action, reward, allq0, allq)
         return state, turns, rounds
 
     # @staticmethod

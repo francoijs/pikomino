@@ -140,4 +140,4 @@ class PolicyRandom(Policy):
             # no dice available -> this roll is lost
             return -1, [], np.empty((0,0))
         action = random.choice(candidates)
-        return action, candidates, np.empty((0,0))
+        return action, candidates, None

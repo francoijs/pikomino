@@ -8,8 +8,6 @@ import numpy as np
 
 
 LEARNING_RATE = 0.001
-# 12 possibles actions: keep 1 of 6 sides and reroll or stop
-OUTPUTS = 12
 log = logging.getLogger('network_q')
 
 
@@ -55,7 +53,7 @@ class NetworkQ():
             epoch = ''
         self.model.save(self.fname+epoch)
         log.info('saved to '+self.fname+epoch)
-        
+
     def get_all(self, state):
         if not np.array_equal(self._cache_state, state):
             self._cache_state = state
